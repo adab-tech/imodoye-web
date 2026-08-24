@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { sql } from "@/lib/db";
-import { uploadImageIfPresent } from "@/lib/upload";
+import { uploadFileIfPresent } from "@/lib/upload";
 import type { PartnerCategoryDb } from "@/lib/categories";
 
 function readFields(formData: FormData) {
@@ -20,7 +20,7 @@ export async function createPartner(formData: FormData) {
   const { name, category, blurb, url, featured } = readFields(formData);
   if (!name) throw new Error("Name is required.");
 
-  const logoUrl = await uploadImageIfPresent(formData.get("logo") as File | null, "partners");
+  const logoUrl = await uploadFileIfPresent(formData.get("logo") as File | null, "partners");
 
   await sql`
     insert into partners (name, category, blurb, url, featured, logo_url)
@@ -35,7 +35,7 @@ export async function updatePartner(id: string, formData: FormData) {
   const { name, category, blurb, url, featured } = readFields(formData);
   if (!name) throw new Error("Name is required.");
 
-  const newLogoUrl = await uploadImageIfPresent(formData.get("logo") as File | null, "partners");
+  const newLogoUrl = await uploadFileIfPresent(formData.get("logo") as File | null, "partners");
 
   if (newLogoUrl) {
     await sql`

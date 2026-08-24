@@ -3,6 +3,8 @@ import { auth, signOut } from "@/lib/auth";
 
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard" },
+  { href: "/admin/review", label: "Editorial Review" },
+  { href: "/admin/issues", label: "Issues" },
   { href: "/admin/fellows", label: "Fellows" },
   { href: "/admin/cohorts", label: "Residency Archive" },
   { href: "/admin/partners", label: "Partners" },

@@ -1,17 +1,22 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ISSUES } from "@/lib/mock-data";
+import { sql } from "@/lib/db";
+import SubmitForm from "./SubmitForm";
 
-export function generateStaticParams() {
-  return ISSUES.map((i) => ({ issueId: i.id }));
+export const revalidate = 60;
+
+export async function generateStaticParams() {
+  const rows = await sql`select number from issues`;
+  return rows.map((r) => ({ issueId: String(r.number) }));
 }
 
-export default function IssuePage({
+export default async function IssuePage({
   params,
 }: {
   params: { issueId: string };
 }) {
-  const issue = ISSUES.find((i) => i.id === params.issueId);
+  const rows = await sql`select * from issues where number = ${Number(params.issueId)}`;
+  const issue = rows[0];
   if (!issue) return notFound();
 
   return (
@@ -33,7 +38,7 @@ export default function IssuePage({
         <p className="font-ui mb-10 opacity-65 max-w-md">{issue.note}</p>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-10">
-          {issue.openCategories.map((c) => (
+          {issue.open_categories.map((c: string) => (
             <div
               key={c}
               className="font-ui text-sm px-4 py-3 border border-manuscript/20 rounded-sm opacity-90"
@@ -43,9 +48,11 @@ export default function IssuePage({
           ))}
         </div>
 
-        <button className="font-ui text-sm px-6 py-3 bg-terracotta text-paper rounded-sm">
-          Submit to this issue
-        </button>
+        {issue.status === "current" ? (
+          <SubmitForm issueId={issue.id} categories={issue.open_categories} />
+        ) : (
+          <p className="font-ui text-sm opacity-50">This issue isn&#39;t open for submissions.</p>
+        )}
       </div>
     </section>
   );

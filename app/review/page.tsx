@@ -1,9 +1,12 @@
 import Link from "next/link";
-import { ISSUES } from "@/lib/mock-data";
+import { sql } from "@/lib/db";
 
 export const metadata = { title: "Imodoye Review — Issue archive" };
+export const revalidate = 60;
 
-export default function ReviewArchivePage() {
+export default async function ReviewArchivePage() {
+  const issues = await sql`select number, theme, note, status from issues order by number`;
+
   return (
     <section className="px-6 py-16 md:px-16 bg-ink text-manuscript min-h-[60vh]">
       <div className="max-w-3xl">
@@ -14,10 +17,10 @@ export default function ReviewArchivePage() {
           call opens.
         </p>
         <div className="grid md:grid-cols-2 gap-4">
-          {ISSUES.map((issue) => (
+          {issues.map((issue) => (
             <Link
-              key={issue.id}
-              href={`/review/${issue.id}`}
+              key={issue.number}
+              href={`/review/${issue.number}`}
               className="text-left border border-manuscript/15 rounded p-6 block"
             >
               <p className="font-mono text-xs mb-2 text-gold opacity-90">

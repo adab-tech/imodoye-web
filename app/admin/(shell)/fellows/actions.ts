@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { sql } from "@/lib/db";
-import { uploadImageIfPresent } from "@/lib/upload";
+import { uploadFileIfPresent } from "@/lib/upload";
 
 function slugify(name: string) {
   return name
@@ -33,7 +33,7 @@ export async function createFellow(formData: FormData) {
 
   const slug = slugify(name);
   const cohortId = await cohortIdForNumber(cohort);
-  const avatarUrl = await uploadImageIfPresent(avatarFile, "fellows");
+  const avatarUrl = await uploadFileIfPresent(avatarFile, "fellows");
 
   await sql`
     insert into fellows (slug, name, cohort_id, genre, location, state, bio, testimonial, featured, avatar_url)
@@ -58,7 +58,7 @@ export async function updateFellow(id: string, formData: FormData) {
   if (!name) throw new Error("Name is required.");
 
   const cohortId = await cohortIdForNumber(cohort);
-  const newAvatarUrl = await uploadImageIfPresent(avatarFile, "fellows");
+  const newAvatarUrl = await uploadFileIfPresent(avatarFile, "fellows");
 
   if (newAvatarUrl) {
     await sql`

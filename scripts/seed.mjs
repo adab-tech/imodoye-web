@@ -91,6 +91,35 @@ try {
     );
   }
 
+  const issues = [
+    { number: 1, theme: "Words that mend the world", status: "current",
+      note: "Dedicated to the fellows of the Imodoye Residency.",
+      openCategories: ["Poetry", "Fiction", "Essays", "Reviews", "Interviews", "Visual Art"] },
+    { number: 2, theme: "Hyena", status: "upcoming",
+      note: "On appetite, scavenging, and what refuses to stay buried.",
+      openCategories: ["Poetry", "Fiction", "Visual Art"] },
+    { number: 3, theme: "Science fiction", status: "upcoming",
+      note: "African futures, speculative and otherwise.",
+      openCategories: ["Fiction", "Essays", "Visual Art"] },
+    { number: 4, theme: "Dream", status: "upcoming",
+      note: "The logic of sleep, and its residue in waking work.",
+      openCategories: ["Poetry", "Fiction", "Interviews"] },
+    { number: 5, theme: "Compassion", status: "upcoming",
+      note: "Care as subject, and as method.",
+      openCategories: ["Essays", "Poetry", "Reviews"] },
+    { number: 6, theme: "Humanity and AI", status: "upcoming",
+      note: "What writing is for, now.",
+      openCategories: ["Essays", "Fiction", "Visual Art"] },
+  ];
+  for (const i of issues) {
+    await client.query(
+      `insert into issues (number, theme, note, status, open_categories)
+       values ($1,$2,$3,$4,$5)
+       on conflict (number) do nothing`,
+      [i.number, i.theme, i.note, i.status, i.openCategories]
+    );
+  }
+
   console.log("Seed complete.");
 } finally {
   await client.end();

@@ -1,9 +1,9 @@
 import { put } from "@vercel/blob";
 
-// Uploads an image from a form's file input, if one was provided.
+// Uploads a file from a form's file input, if one was provided.
 // Returns null when the field was empty so callers can fall back to
 // whatever URL is already stored (don't overwrite on an empty re-submit).
-export async function uploadImageIfPresent(
+export async function uploadFileIfPresent(
   file: File | null,
   pathPrefix: string
 ): Promise<string | null> {

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { sql } from "@/lib/db";
-import { uploadImageIfPresent } from "@/lib/upload";
+import { uploadFileIfPresent } from "@/lib/upload";
 
 export async function updateCohort(id: string, formData: FormData) {
   const title = String(formData.get("title") ?? "").trim() || null;
@@ -17,7 +17,7 @@ export async function updateCohort(id: string, formData: FormData) {
 export async function addCohortPhoto(cohortId: string, formData: FormData) {
   const file = formData.get("photo") as File | null;
   const caption = String(formData.get("caption") ?? "").trim() || null;
-  const url = await uploadImageIfPresent(file, "cohorts");
+  const url = await uploadFileIfPresent(file, "cohorts");
   if (!url) throw new Error("Choose a photo first.");
 
   await sql`insert into media (storage_path, caption, cohort_id) values (${url}, ${caption}, ${cohortId})`;
