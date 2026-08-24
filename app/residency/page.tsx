@@ -40,6 +40,10 @@ export default function ResidencyPage() {
           Start application
         </Link>
       </div>
+
+      <Link href="/residency/archive" className="font-ui text-sm text-indigo underline mt-8 inline-block">
+        View past cohorts &rarr;
+      </Link>
     </section>
   );
 }

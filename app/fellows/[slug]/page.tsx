@@ -16,7 +16,22 @@ export default function FellowProfilePage({
   return (
     <section className="px-6 py-16 md:px-16 max-w-2xl mx-auto">
       <div className="flex items-center gap-4 mb-8">
-        <div className="w-18 h-18 rounded-full bg-indigo/10" style={{ width: 72, height: 72 }} />
+        {fellow.avatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={fellow.avatarUrl}
+            alt={fellow.name}
+            className="rounded-full object-cover"
+            style={{ width: 72, height: 72 }}
+          />
+        ) : (
+          <div
+            className="rounded-full bg-indigo/10 flex items-center justify-center font-mono text-sm text-indigo"
+            style={{ width: 72, height: 72 }}
+          >
+            {fellow.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+          </div>
+        )}
         <div>
           <h1 className="font-display text-3xl">{fellow.name}</h1>
           <p className="font-mono text-sm text-terracotta">

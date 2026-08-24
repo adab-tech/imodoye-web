@@ -11,6 +11,7 @@ export type Fellow = {
   cohort: number;
   role: string;
   location: string;
+  avatarUrl?: string;
   bio: string;
   featured: boolean;
   publishedWorks: { title: string; venue: string; genre: string }[];
@@ -87,6 +88,64 @@ export const ISSUES: Issue[] = [
   { id: "issue-06", number: 6, theme: "Humanity and AI", status: "upcoming",
     note: "What writing is for, now.",
     openCategories: ["Essays", "Fiction", "Visual Art"] },
+];
+
+// Cohorts 1-7 are complete (per app/about's "Seven cohorts later" and
+// app/residency's "Cohort 08 · applications open"). Per-cohort detail
+// (dates, fellow counts, photos) is not yet supplied by the programme
+// team — see docs/content-brief.md.
+export type Cohort = {
+  number: number;
+  fellowCount: number | null;
+  photosAvailable: boolean;
+};
+
+export const COHORTS: Cohort[] = Array.from({ length: 7 }, (_, i) => ({
+  number: i + 1,
+  fellowCount: null,
+  photosAvailable: false,
+}));
+
+// Real, sourced from app/about copy — do not invent additional figures here.
+// writersSupported/statesRepresented are pending real numbers from the
+// programme team (see docs/content-brief.md); render "Coming soon" for null.
+export const IMPACT_STATS = {
+  cohortsCompleted: 7,
+  writersSupported: null as number | null,
+  statesRepresented: null as number | null,
+};
+
+export type PublicationCategory = "Anthology" | "Essay" | "Story" | "Poetry";
+
+export type Publication = {
+  id: string;
+  title: string;
+  author: string;
+  category: PublicationCategory;
+  venue: string;
+  url?: string;
+};
+
+// Empty until the programme/editorial team supplies the archive — see
+// docs/content-brief.md. Pages render an honest "coming soon" empty state
+// per category rather than placeholder titles.
+export const PUBLICATIONS: Publication[] = [];
+
+export type PartnerCategory = "Donor" | "Cultural Institution" | "University";
+
+export type Partner = {
+  id: string;
+  name: string;
+  category: PartnerCategory;
+  blurb?: string;
+  url?: string;
+};
+
+// Only entries already public on imodoye.ng/about — do not add unconfirmed
+// names here. See docs/content-brief.md for what the team still needs to supply.
+export const PARTNERS: Partner[] = [
+  { id: "ana", name: "Association of Nigerian Authors", category: "Cultural Institution" },
+  { id: "ebedi", name: "Ebedi International Writers Residency", category: "Cultural Institution" },
 ];
 
 export const RESIDENCY_STEPS = [
