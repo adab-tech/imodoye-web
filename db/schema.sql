@@ -216,8 +216,23 @@ create table posts (
   author_id uuid references profiles(id) on delete set null,
   title text not null,
   slug text not null unique,
-  body text,
+  body text, -- Markdown, rendered on the public /posts pages
+  excerpt text,
+  category text, -- one of POST_CATEGORIES in lib/categories.ts
+  tags text[] not null default '{}',
+  cover_image_url text,
   published_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+-- A post's attached images/video, shown as a gallery after the body.
+create table post_media (
+  id uuid primary key default gen_random_uuid(),
+  post_id uuid references posts(id) on delete cascade,
+  storage_path text not null,
+  file_type text,
+  caption text,
+  sort_order int not null default 0,
   created_at timestamptz not null default now()
 );
 

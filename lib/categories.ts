@@ -12,3 +12,16 @@ export const PARTNER_CATEGORY_LABELS: Record<PartnerCategoryDb, string> = {
 
 export const PUBLICATION_CATEGORIES = ["Anthology", "Essay", "Story", "Poetry"] as const;
 export type PublicationCategory = (typeof PUBLICATION_CATEGORIES)[number];
+
+// Posts categories mirror the site's own sections, so a post can point
+// readers back to the page it's about (a Residency update, a Review call
+// for submissions, a Fellows spotlight, etc).
+export const POST_CATEGORIES = [
+  "General",
+  "Residency",
+  "Review",
+  "Fellows",
+  "Community",
+  "Press",
+] as const;
+export type PostCategory = (typeof POST_CATEGORIES)[number];
