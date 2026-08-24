@@ -3,7 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { sql } from "@/lib/db";
 
-// Roles allowed into /admin. "fellow" and "public" are site visitors, not editors.
+// Roles allowed into /admin.
 export const ADMIN_ROLES = [
   "super_admin",
   "programme_director",
@@ -15,9 +15,16 @@ export const ADMIN_ROLES = [
 ] as const;
 export type AdminRole = (typeof ADMIN_ROLES)[number];
 
+// Site visitors with an account — fellows/applicants tracking their status,
+// or anyone who signed up. Not editors; can't reach /admin.
+export const PUBLIC_ROLES = ["fellow", "public"] as const;
+export type PublicRole = (typeof PUBLIC_ROLES)[number];
+
+export type UserRole = AdminRole | PublicRole;
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: "jwt" },
-  pages: { signIn: "/admin/login" },
+  pages: { signIn: "/account/login" },
   providers: [
     Credentials({
       credentials: {
@@ -39,13 +46,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const valid = await bcrypt.compare(password, profile.password_hash);
         if (!valid) return null;
-        if (!ADMIN_ROLES.includes(profile.role)) return null;
 
+        // Any role may authenticate — admin-only routes are gated
+        // separately by requireRole()/the /admin layout, not here.
         return {
           id: profile.id,
           name: profile.full_name,
           email: profile.email,
-          role: profile.role as AdminRole,
+          role: profile.role as UserRole,
         };
       },
     }),
@@ -54,21 +62,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.sub = user.id;
-        token.role = (user as { role?: AdminRole }).role;
+        token.role = (user as { role?: UserRole }).role;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.sub as string;
-        (session.user as { role?: AdminRole }).role = token.role as AdminRole;
+        (session.user as { role?: UserRole }).role = token.role as UserRole;
       }
       return session;
     },
   },
 });
 
-export async function requireRole(allowed: readonly AdminRole[]) {
+export async function requireRole(allowed: readonly UserRole[]) {
   const session = await auth();
   if (!session?.user || !allowed.includes(session.user.role)) {
     throw new Error("Not authorized.");
@@ -87,20 +95,20 @@ export const OWNER_ROLES: readonly AdminRole[] = ["super_admin", "programme_dire
 
 declare module "@auth/core/types" {
   interface User {
-    role?: AdminRole;
+    role?: UserRole;
   }
   interface Session {
     user: {
       id?: string;
       name?: string | null;
       email?: string | null;
-      role: AdminRole;
+      role: UserRole;
     };
   }
 }
 
 declare module "@auth/core/jwt" {
   interface JWT {
-    role?: AdminRole;
+    role?: UserRole;
   }
 }

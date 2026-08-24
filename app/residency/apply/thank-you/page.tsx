@@ -11,6 +11,10 @@ export default function ApplicationThankYouPage() {
         Your application to Cohort 08 has been received. The board reviews
         applications on a rolling basis — we&#39;ll be in touch by email.
       </p>
+      <p className="font-ui text-sm opacity-70 mb-8">
+        <Link href="/account/signup" className="text-indigo underline">Create an account</Link> with
+        this same email to track your application&#39;s status here anytime.
+      </p>
       <Link href="/residency" className="font-ui text-sm text-indigo underline">
         ← Back to Residency
       </Link>

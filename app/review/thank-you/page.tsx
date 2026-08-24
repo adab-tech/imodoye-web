@@ -21,6 +21,10 @@ export default function ThankYouPage({
           Your work has entered the editorial queue. We read every
           submission blind — we&#39;ll be in touch by email with a decision.
         </p>
+        <p className="font-ui text-sm opacity-70 mb-8">
+          <Link href="/account/signup" className="text-gold underline">Create an account</Link> with
+          this same email to track your submission&#39;s status here anytime.
+        </p>
         <Link href="/review" className="font-ui text-sm opacity-60 underline">
           ← Back to the Review
         </Link>

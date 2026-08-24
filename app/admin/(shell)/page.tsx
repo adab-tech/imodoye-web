@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { sql } from "@/lib/db";
-import { auth, OWNER_ROLES } from "@/lib/auth";
+import { auth, OWNER_ROLES, type AdminRole } from "@/lib/auth";
 
 export const metadata = { title: "Dashboard — Imodoye Admin" };
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
   const session = await auth();
-  const isOwner = session?.user?.role && OWNER_ROLES.includes(session.user.role);
+  const isOwner = session?.user?.role && OWNER_ROLES.includes(session.user.role as AdminRole);
 
   const [[fellows], [partners], [publications], [posts], [team]] = await Promise.all([
     sql`select count(*)::int as count from fellows`,

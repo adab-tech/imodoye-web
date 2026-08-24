@@ -6,6 +6,7 @@ const FOOTER_LINKS = [
   { href: "/publications", label: "Publications" },
   { href: "/posts", label: "News & Updates" },
   { href: "/partners", label: "Partners & Supporters" },
+  { href: "/contact", label: "Contact" },
 ];
 
 export default function SiteFooter() {

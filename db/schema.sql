@@ -252,6 +252,28 @@ create table site_settings (
   value text
 );
 
+-- The simple public contact form (/contact) — no auth required to submit.
+create table inquiries (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  email text not null,
+  message text not null,
+  status text not null default 'new', -- new | read | replied
+  created_at timestamptz not null default now()
+);
+
+-- Post comments: name/email only, no account required. Held for admin
+-- approval before appearing publicly (spam control on an open form).
+create table post_comments (
+  id uuid primary key default gen_random_uuid(),
+  post_id uuid references posts(id) on delete cascade,
+  author_name text not null,
+  author_email text not null,
+  body text not null,
+  approved boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
 create table events (
   id uuid primary key default gen_random_uuid(),
   title text not null,

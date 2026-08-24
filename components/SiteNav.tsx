@@ -26,7 +26,7 @@ export default function SiteNav() {
         ))}
       </nav>
       <Link
-        href="/admin/login"
+        href="/account/login"
         className="text-sm px-4 py-2 border border-indigo text-indigo rounded-sm font-ui"
       >
         Sign in

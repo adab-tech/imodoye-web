@@ -1,12 +1,15 @@
 import Link from "next/link";
-import { auth, signOut, OWNER_ROLES } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { auth, signOut, ADMIN_ROLES, OWNER_ROLES } from "@/lib/auth";
 
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/review", label: "Editorial Review" },
   { href: "/admin/issues", label: "Issues" },
   { href: "/admin/applications", label: "Applications" },
+  { href: "/admin/inquiries", label: "Inquiries" },
   { href: "/admin/posts", label: "Posts" },
+  { href: "/admin/comments", label: "Comments" },
   { href: "/admin/fellows", label: "Fellows" },
   { href: "/admin/cohorts", label: "Residency Archive" },
   { href: "/admin/partners", label: "Partners" },
@@ -24,7 +27,12 @@ export default async function AdminShellLayout({
   children: React.ReactNode;
 }) {
   const session = await auth();
-  const isOwner = session?.user?.role && OWNER_ROLES.includes(session.user.role);
+  // A fellow/public account can authenticate (accounts are shared across
+  // /admin and /account now), but only admin roles may actually see /admin.
+  if (!session?.user || !ADMIN_ROLES.includes(session.user.role as (typeof ADMIN_ROLES)[number])) {
+    redirect("/admin/login");
+  }
+  const isOwner = OWNER_ROLES.includes(session.user.role as (typeof OWNER_ROLES)[number]);
 
   return (
     <div className="min-h-screen flex bg-manuscript">
