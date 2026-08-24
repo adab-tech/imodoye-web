@@ -1,5 +1,5 @@
 import { POST_CATEGORIES } from "@/lib/categories";
-import MarkdownEditor from "./MarkdownEditor";
+import RichTextEditor from "./RichTextEditor";
 
 export type PostFormValues = {
   title?: string;
@@ -74,7 +74,7 @@ export default function PostForm({
 
       <div>
         <label className="block font-ui text-sm mb-1 opacity-70">Body</label>
-        <MarkdownEditor name="body" defaultValue={values?.body} />
+        <RichTextEditor name="body" defaultValue={values?.body} />
       </div>
 
       <label className="flex items-center gap-2 font-ui text-sm">

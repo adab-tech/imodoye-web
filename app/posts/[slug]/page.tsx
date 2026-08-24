@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import ReactMarkdown from "react-markdown";
 import { sql } from "@/lib/db";
 
 export const revalidate = 60;
@@ -46,9 +45,10 @@ export default async function PostPage({ params }: { params: { slug: string } })
       <h1 className="font-display text-4xl mb-8">{post.title}</h1>
 
       {post.body && (
-        <div className="prose-post font-ui text-base leading-relaxed opacity-85">
-          <ReactMarkdown>{post.body}</ReactMarkdown>
-        </div>
+        <div
+          className="prose-post font-ui text-base leading-relaxed opacity-85"
+          dangerouslySetInnerHTML={{ __html: post.body }}
+        />
       )}
 
       {post.tags?.length > 0 && (

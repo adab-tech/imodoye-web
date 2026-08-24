@@ -5,6 +5,10 @@ import { POST_CATEGORIES } from "@/lib/categories";
 export const metadata = { title: "Posts — Imodoye" };
 export const revalidate = 60;
 
+function stripHtml(html: string) {
+  return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
+
 export default async function PostsPage({
   searchParams,
 }: {
@@ -73,7 +77,9 @@ export default async function PostsPage({
               </p>
               <p className="font-display text-2xl mb-2">{p.title}</p>
               {(p.excerpt || p.body) && (
-                <p className="font-ui text-sm opacity-70 line-clamp-2">{(p.excerpt || p.body).slice(0, 180)}</p>
+                <p className="font-ui text-sm opacity-70 line-clamp-2">
+                  {(p.excerpt || stripHtml(p.body)).slice(0, 180)}
+                </p>
               )}
               {p.tags?.length > 0 && (
                 <p className="font-mono text-xs mt-3 opacity-50">{p.tags.map((t: string) => `#${t}`).join("  ")}</p>
