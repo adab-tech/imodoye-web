@@ -26,6 +26,10 @@ export const metadata: Metadata = {
   description:
     "Imodoye is a writers' residency, fellowship community, and publishing house working from Ilorin, Nigeria toward the wider literary world.",
   metadataBase: new URL("https://imodoye.ng"),
+  manifest: "/site.webmanifest",
+  icons: {
+    apple: "/brand/apple-icon.png",
+  },
   openGraph: {
     title: "Imodoye",
     description: "A home for writers. A space for stories.",
