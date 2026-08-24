@@ -1,4 +1,5 @@
 import { POST_CATEGORIES } from "@/lib/categories";
+import MarkdownEditor from "./MarkdownEditor";
 
 export type PostFormValues = {
   title?: string;
@@ -72,13 +73,8 @@ export default function PostForm({
       </div>
 
       <div>
-        <label className="block font-ui text-sm mb-1 opacity-70">Body (Markdown supported)</label>
-        <textarea
-          name="body"
-          defaultValue={values?.body}
-          rows={14}
-          className="w-full px-3 py-2 border border-ink/15 rounded-sm font-mono text-sm"
-        />
+        <label className="block font-ui text-sm mb-1 opacity-70">Body</label>
+        <MarkdownEditor name="body" defaultValue={values?.body} />
       </div>
 
       <label className="flex items-center gap-2 font-ui text-sm">
