@@ -1,5 +1,6 @@
 "use server";
 
+import { redirect } from "next/navigation";
 import { signIn } from "@/lib/auth";
 import { AuthError } from "next-auth";
 
@@ -12,8 +13,8 @@ export async function loginAction(formData: FormData) {
     await signIn("credentials", { email, password, redirectTo: next });
   } catch (err) {
     if (err instanceof AuthError) {
-      throw new Error("Invalid email or password.");
+      redirect(`/admin/login?next=${encodeURIComponent(next)}&error=1`);
     }
-    throw err;
+    throw err; // e.g. the internal redirect signal on success — let it propagate
   }
 }

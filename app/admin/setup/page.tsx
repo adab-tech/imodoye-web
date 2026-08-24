@@ -5,7 +5,11 @@ import { bootstrapAdmin } from "./actions";
 export const metadata = { title: "Set up admin — Imodoye" };
 export const dynamic = "force-dynamic";
 
-export default async function AdminSetupPage() {
+export default async function AdminSetupPage({
+  searchParams,
+}: {
+  searchParams: { error?: string };
+}) {
   const [{ count }] = await sql`select count(*)::int as count from profiles where role = 'super_admin'`;
   if (count > 0) redirect("/admin/login");
 
@@ -14,6 +18,12 @@ export default async function AdminSetupPage() {
       <form action={bootstrapAdmin} className="w-full max-w-sm bg-paper rounded p-8">
         <p className="font-mono text-xs mb-2 text-terracotta">FIRST-RUN SETUP</p>
         <h1 className="font-display text-2xl mb-6">Create the first admin account</h1>
+
+        {searchParams.error === "missing" && (
+          <p className="font-ui text-sm text-terracotta mb-4">
+            Name, email, and an 8+ character password are all required.
+          </p>
+        )}
 
         <label className="block font-ui text-sm mb-1 opacity-70">Full name</label>
         <input

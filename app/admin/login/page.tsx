@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminLoginPage({
   searchParams,
 }: {
-  searchParams: { next?: string };
+  searchParams: { next?: string; error?: string };
 }) {
   const [{ count }] = await sql`select count(*)::int as count from profiles where role = 'super_admin'`;
   if (count === 0) redirect("/admin/setup");
@@ -34,12 +34,21 @@ export default async function AdminLoginPage({
           name="password"
           type="password"
           required
-          className="w-full mb-6 px-3 py-2 border border-ink/15 rounded-sm font-ui text-sm"
+          className="w-full mb-2 px-3 py-2 border border-ink/15 rounded-sm font-ui text-sm"
         />
+
+        {searchParams.error === "race" && (
+          <p className="font-ui text-sm text-terracotta mb-4">
+            Setup was just completed by someone else. Sign in with those credentials.
+          </p>
+        )}
+        {searchParams.error && searchParams.error !== "race" && (
+          <p className="font-ui text-sm text-terracotta mb-4">Invalid email or password.</p>
+        )}
 
         <button
           type="submit"
-          className="w-full font-ui text-sm px-6 py-3 bg-indigo text-paper rounded-sm"
+          className={`w-full font-ui text-sm px-6 py-3 bg-indigo text-paper rounded-sm ${searchParams.error ? "" : "mt-4"}`}
         >
           Sign in
         </button>

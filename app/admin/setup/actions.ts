@@ -11,12 +11,12 @@ export async function bootstrapAdmin(formData: FormData) {
   const password = String(formData.get("password") ?? "");
 
   if (!fullName || !email || password.length < 8) {
-    throw new Error("Name, email, and an 8+ character password are required.");
+    redirect("/admin/setup?error=missing");
   }
 
   const [{ count }] = await sql`select count(*)::int as count from profiles where role = 'super_admin'`;
   if (count > 0) {
-    throw new Error("Setup already completed.");
+    redirect("/admin/login");
   }
 
   const passwordHash = await bcrypt.hash(password, 12);
@@ -29,7 +29,7 @@ export async function bootstrapAdmin(formData: FormData) {
     // A concurrent request may have won the race despite the count check
     // above — profiles_one_super_admin (db/schema.sql) is the real guard.
     if ((err as { code?: string })?.code === "23505") {
-      throw new Error("Setup was just completed by someone else. Sign in instead.");
+      redirect("/admin/login?error=race");
     }
     throw err;
   }
