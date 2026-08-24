@@ -1,12 +1,13 @@
 -- IMODOYE — core schema
 -- Implements workplan.md §3 (data model), §4 (editorial workflow),
 -- §5 (RBAC), and the theme-per-issue correction.
--- Runs against plain Postgres (Neon). Auth is not yet wired up — profiles.id
--- is a standalone uuid for now; link it to whichever auth provider is chosen
--- (Neon Auth or otherwise) when real login is built. The RLS policies below
--- assume a Supabase-style auth.uid() function that Neon doesn't provide out
--- of the box — they're kept as a reference for the shape of the access rules
--- but are commented out until an equivalent is wired up at the app layer.
+-- Runs against plain Postgres (Neon). Admin auth is Auth.js Credentials,
+-- verified against profiles.email/password_hash below (see lib/auth.ts) —
+-- Neon Auth was left mid-provision and isn't required. The RLS policies
+-- below assume a Supabase-style auth.uid() function that Neon doesn't
+-- provide out of the box — they're kept as a reference for the shape of
+-- the access rules but are commented out until an equivalent (a Postgres
+-- session variable set per-request, most likely) is wired up at the app layer.
 
 -- ============ ROLES ============
 create type user_role as enum (
@@ -24,6 +25,8 @@ create type user_role as enum (
 create table profiles (
   id uuid primary key default gen_random_uuid(),
   full_name text not null,
+  email text unique,
+  password_hash text,
   role user_role not null default 'public',
   avatar_url text,
   bio text,
@@ -38,19 +41,44 @@ create table profiles (
 create table cohorts (
   id uuid primary key default gen_random_uuid(),
   number int not null unique,
-  year int not null,
+  year int, -- nullable: exact years per cohort aren't confirmed yet
   title text,
   created_at timestamptz not null default now()
 );
 
+-- name/role/location/state/avatar_url/bio/testimonial/slug are denormalized
+-- here rather than joined through profiles — v1 admin CRUD only needs a flat
+-- shape matching the public fellow directory/profile pages exactly. profile_id
+-- stays available for when a fellow gets a real login (e.g. as a reviewer).
 create table fellows (
   id uuid primary key default gen_random_uuid(),
   profile_id uuid references profiles(id) on delete set null,
   cohort_id uuid references cohorts(id) on delete set null,
+  slug text unique,
+  name text,
+  role text,
+  location text,
+  state text,
+  avatar_url text,
+  bio text,
+  testimonial text,
   genre text,
   project text,
   featured boolean not null default false,
   created_at timestamptz not null default now()
+);
+
+-- Flat title/venue/genre triples for work a fellow published elsewhere
+-- (external magazines, etc.) — deliberately not the publications/contributors
+-- relation below, which is specifically for pieces that went through the
+-- Imodoye Review's own editorial pipeline.
+create table fellow_published_works (
+  id uuid primary key default gen_random_uuid(),
+  fellow_id uuid references fellows(id) on delete cascade,
+  title text not null,
+  venue text,
+  genre text,
+  sort_order int not null default 0
 );
 
 create type application_stage as enum (
@@ -157,6 +185,20 @@ create table publications (
   created_at timestamptz not null default now()
 );
 
+-- The broader /publications archive (anthologies, essays, stories, poetry —
+-- including work published outside the Imodoye Review, with an arbitrary
+-- venue). Deliberately separate from `publications` above, which only
+-- covers pieces that went through the Review's own editorial pipeline.
+create table publication_entries (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  author text not null,
+  category text not null check (category in ('Anthology','Essay','Story','Poetry')),
+  venue text,
+  url text,
+  created_at timestamptz not null default now()
+);
+
 create table contributors (
   id uuid primary key default gen_random_uuid(),
   profile_id uuid references profiles(id) on delete cascade,
@@ -218,7 +260,7 @@ create type partner_category as enum (
 
 create table partners (
   id uuid primary key default gen_random_uuid(),
-  name text not null,
+  name text not null unique,
   category partner_category not null,
   logo_url text,
   url text,

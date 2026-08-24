@@ -1,9 +1,15 @@
 import Link from "next/link";
-import { IMPACT_STATS, PARTNERS } from "@/lib/mock-data";
+import { sql } from "@/lib/db";
 
 export const metadata = { title: "About — Imodoye" };
+export const revalidate = 60;
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const [[{ count: cohortsCompleted }], partners] = await Promise.all([
+    sql`select count(*)::int as count from cohorts`,
+    sql`select name from partners order by category, name`,
+  ]);
+
   return (
     <section className="px-6 py-16 md:px-16 max-w-2xl">
       <p className="font-mono text-xs mb-3 text-indigo">ABOUT</p>
@@ -23,19 +29,19 @@ export default function AboutPage() {
       <p className="font-mono text-xs mb-4 text-palm">IMPACT</p>
       <div className="grid grid-cols-3 gap-4 mb-10">
         <div>
-          <p className="font-display text-3xl">{IMPACT_STATS.cohortsCompleted}</p>
+          <p className="font-display text-3xl">{cohortsCompleted}</p>
           <p className="font-ui text-sm opacity-60">Cohorts completed</p>
         </div>
         <div>
-          <p className="font-display text-3xl opacity-40">
-            {IMPACT_STATS.writersSupported ?? "—"}
-          </p>
+          {/* Not wired to a fellow count yet — the admin roster is still
+              partial (3 of 7 cohorts entered), and a live count would
+              understate the real total rather than show it. Revisit once
+              the roster is complete; see docs/content-brief.md. */}
+          <p className="font-display text-3xl opacity-40">—</p>
           <p className="font-ui text-sm opacity-60">Writers supported</p>
         </div>
         <div>
-          <p className="font-display text-3xl opacity-40">
-            {IMPACT_STATS.statesRepresented ?? "—"}
-          </p>
+          <p className="font-display text-3xl opacity-40">—</p>
           <p className="font-ui text-sm opacity-60">States represented</p>
         </div>
       </div>
@@ -44,7 +50,7 @@ export default function AboutPage() {
         PARTNERS &amp; SUPPORTERS
       </p>
       <p className="font-ui opacity-70 mb-3">
-        {PARTNERS.map((p) => p.name).join(" · ")}
+        {partners.map((p) => p.name).join(" · ")}
       </p>
       <Link href="/partners" className="font-ui text-sm text-indigo underline">
         View all partners &rarr;

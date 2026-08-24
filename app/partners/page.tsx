@@ -1,15 +1,12 @@
-import { PARTNERS, PartnerCategory } from "@/lib/mock-data";
+import { sql } from "@/lib/db";
+import { PARTNER_CATEGORIES, PARTNER_CATEGORY_LABELS, type PartnerCategoryDb } from "@/lib/categories";
 
 export const metadata = { title: "Partners & Supporters — Imodoye" };
+export const revalidate = 60;
 
-const CATEGORY_LABELS: Record<PartnerCategory, string> = {
-  "Cultural Institution": "Cultural Institutions",
-  University: "Universities",
-  Donor: "Donors",
-};
-const CATEGORIES: PartnerCategory[] = ["Cultural Institution", "University", "Donor"];
+export default async function PartnersPage() {
+  const partners = await sql`select name, category, blurb from partners order by category, name`;
 
-export default function PartnersPage() {
   return (
     <section className="px-6 py-16 md:px-16 max-w-2xl">
       <p className="font-mono text-xs mb-3 text-terracotta">PARTNERS &amp; SUPPORTERS</p>
@@ -19,17 +16,17 @@ export default function PartnersPage() {
         donors who back the residency and the Review.
       </p>
 
-      {CATEGORIES.map((category) => {
-        const entries = PARTNERS.filter((p) => p.category === category);
+      {PARTNER_CATEGORIES.map((category) => {
+        const entries = partners.filter((p) => p.category === category);
         return (
           <div key={category} className="mb-10">
             <p className="font-mono text-xs mb-4 text-indigo">
-              {CATEGORY_LABELS[category].toUpperCase()}
+              {PARTNER_CATEGORY_LABELS[category as PartnerCategoryDb].toUpperCase()}
             </p>
             {entries.length > 0 ? (
               <ul className="space-y-2">
                 {entries.map((p) => (
-                  <li key={p.id} className="font-ui text-lg">
+                  <li key={p.name} className="font-ui text-lg">
                     {p.name}
                     {p.blurb && (
                       <span className="block font-ui text-sm opacity-60 mt-1">{p.blurb}</span>
