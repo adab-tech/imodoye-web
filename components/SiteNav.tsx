@@ -14,6 +14,7 @@ export default function SiteNav() {
         <svg width="26" height="26" viewBox="0 0 28 28" aria-hidden="true">
           <circle cx="14" cy="14" r="10" fill="none" stroke="#263B73" strokeWidth="2" />
           <path d="M14 5 A9 9 0 0 1 23 14" fill="none" stroke="#C99A3D" strokeWidth="2" strokeLinecap="round" />
+          <rect x="12.5" y="9" width="3" height="10" rx="1" fill="#B85C38" />
         </svg>
         <span className="font-display text-lg text-ink">IMODOYE</span>
       </Link>
