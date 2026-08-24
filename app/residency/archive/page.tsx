@@ -4,9 +4,11 @@ export const metadata = { title: "Residency Archive — Imodoye" };
 export const revalidate = 60;
 
 export default async function ResidencyArchivePage() {
-  const cohorts = await sql`select id, number from cohorts order by number`;
-  const fellows = await sql`select cohort_id, name from fellows where cohort_id is not null`;
-  const photos = await sql`select cohort_id from media where cohort_id is not null`;
+  const [cohorts, fellows, photos] = await Promise.all([
+    sql`select id, number from cohorts order by number`,
+    sql`select cohort_id, name from fellows where cohort_id is not null`,
+    sql`select cohort_id from media where cohort_id is not null`,
+  ]);
 
   return (
     <section className="px-6 py-16 md:px-16 max-w-3xl">

@@ -37,6 +37,12 @@ create table profiles (
   created_at timestamptz not null default now()
 );
 
+-- Enforces "only one first-run admin" at the DB layer, not just the
+-- check-then-insert in app/admin/setup/actions.ts (which alone has a race
+-- window between two concurrent first-run requests).
+create unique index if not exists profiles_one_super_admin
+  on profiles ((role)) where role = 'super_admin';
+
 -- ============ RESIDENCY / FELLOWSHIP ============
 create table cohorts (
   id uuid primary key default gen_random_uuid(),
@@ -56,13 +62,12 @@ create table fellows (
   cohort_id uuid references cohorts(id) on delete set null,
   slug text unique,
   name text,
-  role text,
   location text,
   state text,
   avatar_url text,
   bio text,
   testimonial text,
-  genre text,
+  genre text, -- doubles as the displayed "role" (Poet, Novelist, Essayist...)
   project text,
   featured boolean not null default false,
   created_at timestamptz not null default now()

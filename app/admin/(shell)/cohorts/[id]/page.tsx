@@ -6,12 +6,13 @@ export const metadata = { title: "Edit cohort — Imodoye Admin" };
 export const dynamic = "force-dynamic";
 
 export default async function EditCohortPage({ params }: { params: { id: string } }) {
-  const rows = await sql`select * from cohorts where id = ${params.id}`;
+  const [rows, fellows, photos] = await Promise.all([
+    sql`select * from cohorts where id = ${params.id}`,
+    sql`select id, name from fellows where cohort_id = ${params.id} order by name`,
+    sql`select id, storage_path, caption from media where cohort_id = ${params.id} order by created_at`,
+  ]);
   const cohort = rows[0];
   if (!cohort) return notFound();
-
-  const fellows = await sql`select id, name from fellows where cohort_id = ${params.id} order by name`;
-  const photos = await sql`select id, storage_path, caption from media where cohort_id = ${params.id} order by created_at`;
 
   return (
     <div>

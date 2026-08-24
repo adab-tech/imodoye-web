@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { sql } from "@/lib/db";
+import { requireRole, CONTENT_ROLES } from "@/lib/auth";
 
 function readFields(formData: FormData) {
   const categories = String(formData.get("categories") ?? "")
@@ -19,6 +20,7 @@ function readFields(formData: FormData) {
 }
 
 export async function createIssue(formData: FormData) {
+  await requireRole(CONTENT_ROLES);
   const { number, theme, note, status, categories } = readFields(formData);
   if (!number || !theme || !note) throw new Error("Number, theme, and note are required.");
 
@@ -32,6 +34,7 @@ export async function createIssue(formData: FormData) {
 }
 
 export async function updateIssue(id: string, formData: FormData) {
+  await requireRole(CONTENT_ROLES);
   const { number, theme, note, status, categories } = readFields(formData);
   if (!number || !theme || !note) throw new Error("Number, theme, and note are required.");
 

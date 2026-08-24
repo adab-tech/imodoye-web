@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { sql } from "@/lib/db";
 import { uploadFileIfPresent } from "@/lib/upload";
+import { requireRole, CONTENT_ROLES } from "@/lib/auth";
 
 function slugify(name: string) {
   return name
@@ -14,11 +15,13 @@ function slugify(name: string) {
 }
 
 async function cohortIdForNumber(cohortNumber: number) {
+  if (!cohortNumber) return null; // blank "—" option reads as 0, not a real cohort
   const rows = await sql`select id from cohorts where number = ${cohortNumber}`;
   return rows[0]?.id ?? null;
 }
 
 export async function createFellow(formData: FormData) {
+  await requireRole(CONTENT_ROLES);
   const name = String(formData.get("name") ?? "").trim();
   const cohort = Number(formData.get("cohort"));
   const role = String(formData.get("role") ?? "").trim();
@@ -33,7 +36,7 @@ export async function createFellow(formData: FormData) {
 
   const slug = slugify(name);
   const cohortId = await cohortIdForNumber(cohort);
-  const avatarUrl = await uploadFileIfPresent(avatarFile, "fellows");
+  const avatarUrl = await uploadFileIfPresent(avatarFile, "fellows", { requireImage: true });
 
   await sql`
     insert into fellows (slug, name, cohort_id, genre, location, state, bio, testimonial, featured, avatar_url)
@@ -45,6 +48,7 @@ export async function createFellow(formData: FormData) {
 }
 
 export async function updateFellow(id: string, formData: FormData) {
+  await requireRole(CONTENT_ROLES);
   const name = String(formData.get("name") ?? "").trim();
   const cohort = Number(formData.get("cohort"));
   const role = String(formData.get("role") ?? "").trim();
@@ -58,7 +62,7 @@ export async function updateFellow(id: string, formData: FormData) {
   if (!name) throw new Error("Name is required.");
 
   const cohortId = await cohortIdForNumber(cohort);
-  const newAvatarUrl = await uploadFileIfPresent(avatarFile, "fellows");
+  const newAvatarUrl = await uploadFileIfPresent(avatarFile, "fellows", { requireImage: true });
 
   if (newAvatarUrl) {
     await sql`
@@ -80,12 +84,14 @@ export async function updateFellow(id: string, formData: FormData) {
 }
 
 export async function deleteFellow(id: string) {
+  await requireRole(CONTENT_ROLES);
   await sql`delete from fellows where id = ${id}`;
   revalidatePath("/admin/fellows");
   redirect("/admin/fellows");
 }
 
 export async function addPublishedWork(fellowId: string, formData: FormData) {
+  await requireRole(CONTENT_ROLES);
   const title = String(formData.get("title") ?? "").trim();
   const venue = String(formData.get("venue") ?? "").trim() || null;
   const genre = String(formData.get("genre") ?? "").trim() || null;
@@ -99,6 +105,7 @@ export async function addPublishedWork(fellowId: string, formData: FormData) {
 }
 
 export async function removePublishedWork(workId: string, fellowId: string) {
+  await requireRole(CONTENT_ROLES);
   await sql`delete from fellow_published_works where id = ${workId}`;
   revalidatePath(`/admin/fellows/${fellowId}`);
 }

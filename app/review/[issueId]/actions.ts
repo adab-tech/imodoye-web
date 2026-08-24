@@ -46,11 +46,15 @@ export async function submitToIssue(issueId: string, formData: FormData) {
         returning id
       `;
       submissionId = rows[0].id;
-    } catch {
+    } catch (err) {
+      // 23505 = unique_violation — only that's worth retrying with a new
+      // reference. Anything else (bad issue_id, connection failure, etc.)
+      // is a real error and should surface, not be masked by a retry loop.
+      if ((err as { code?: string })?.code !== "23505") throw err;
       reference = randomReference();
     }
   }
-  if (!submissionId) throw new Error("Could not create submission. Try again.");
+  if (!submissionId) throw new Error("Could not generate a unique reference. Try again.");
 
   if (sampleFile && sampleFile.size > 0) {
     const url = await uploadFileIfPresent(sampleFile, "submissions");

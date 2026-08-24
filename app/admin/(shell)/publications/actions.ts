@@ -3,19 +3,25 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { sql } from "@/lib/db";
-import type { PublicationCategory } from "@/lib/categories";
+import { PUBLICATION_CATEGORIES, type PublicationCategory } from "@/lib/categories";
+import { requireRole, CONTENT_ROLES } from "@/lib/auth";
 
 function readFields(formData: FormData) {
+  const category = String(formData.get("category") ?? "");
+  if (!PUBLICATION_CATEGORIES.includes(category as PublicationCategory)) {
+    throw new Error("Choose a valid category.");
+  }
   return {
     title: String(formData.get("title") ?? "").trim(),
     author: String(formData.get("author") ?? "").trim(),
-    category: String(formData.get("category") ?? "") as PublicationCategory,
+    category: category as PublicationCategory,
     venue: String(formData.get("venue") ?? "").trim() || null,
     url: String(formData.get("url") ?? "").trim() || null,
   };
 }
 
 export async function createPublicationEntry(formData: FormData) {
+  await requireRole(CONTENT_ROLES);
   const { title, author, category, venue, url } = readFields(formData);
   if (!title || !author) throw new Error("Title and author are required.");
 
@@ -28,6 +34,7 @@ export async function createPublicationEntry(formData: FormData) {
 }
 
 export async function updatePublicationEntry(id: string, formData: FormData) {
+  await requireRole(CONTENT_ROLES);
   const { title, author, category, venue, url } = readFields(formData);
   if (!title || !author) throw new Error("Title and author are required.");
 
@@ -40,6 +47,7 @@ export async function updatePublicationEntry(id: string, formData: FormData) {
 }
 
 export async function deletePublicationEntry(id: string) {
+  await requireRole(CONTENT_ROLES);
   await sql`delete from publication_entries where id = ${id}`;
   revalidatePath("/admin/publications");
   redirect("/admin/publications");

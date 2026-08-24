@@ -52,15 +52,35 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     async jwt({ token, user }) {
-      if (user) token.role = (user as { role?: AdminRole }).role;
+      if (user) {
+        token.sub = user.id;
+        token.role = (user as { role?: AdminRole }).role;
+      }
       return token;
     },
     async session({ session, token }) {
-      if (session.user) (session.user as { role?: AdminRole }).role = token.role as AdminRole;
+      if (session.user) {
+        session.user.id = token.sub as string;
+        (session.user as { role?: AdminRole }).role = token.role as AdminRole;
+      }
       return session;
     },
   },
 });
+
+export async function requireRole(allowed: readonly AdminRole[]) {
+  const session = await auth();
+  if (!session?.user || !allowed.includes(session.user.role)) {
+    throw new Error("Not authorized.");
+  }
+  return session;
+}
+
+// Everyone except "reviewer" — reviewing submissions isn't the same
+// privilege as editing site content (Fellows, Partners, Publications, etc).
+export const CONTENT_ROLES = ADMIN_ROLES.filter((r) => r !== "reviewer");
+// Everyone except "content_editor" — the inverse split for the review queue.
+export const REVIEW_ROLES = ADMIN_ROLES.filter((r) => r !== "content_editor");
 
 declare module "@auth/core/types" {
   interface User {

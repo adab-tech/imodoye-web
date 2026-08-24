@@ -7,15 +7,19 @@ export const metadata = { title: "Blind review — Imodoye Admin" };
 export const dynamic = "force-dynamic";
 
 export default async function BlindReviewPage({ params }: { params: { id: string } }) {
-  const rows = await sql`select * from submissions where id = ${params.id}`;
+  // Explicit column list — deliberately excludes author_id. Blind review
+  // depends on this query never having the author's identity to leak,
+  // not just on the JSX choosing not to render it (see db/schema.sql).
+  const [rows, files, priorReviews] = await Promise.all([
+    sql`select id, reference, genre, word_count, stage from submissions where id = ${params.id}`,
+    sql`select storage_path, file_type from submission_files where submission_id = ${params.id}`,
+    sql`
+      select rating, recommendation, notes, created_at from submission_reviews
+      where submission_id = ${params.id} order by created_at desc
+    `,
+  ]);
   const submission = rows[0];
   if (!submission) return notFound();
-
-  const files = await sql`select storage_path, file_type from submission_files where submission_id = ${params.id}`;
-  const priorReviews = await sql`
-    select rating, recommendation, notes, created_at from submission_reviews
-    where submission_id = ${params.id} order by created_at desc
-  `;
 
   const boundSubmit = submitReview.bind(null, params.id);
   const boundClaim = claimForReview.bind(null, params.id);

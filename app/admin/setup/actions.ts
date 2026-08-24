@@ -20,10 +20,19 @@ export async function bootstrapAdmin(formData: FormData) {
   }
 
   const passwordHash = await bcrypt.hash(password, 12);
-  await sql`
-    insert into profiles (full_name, email, password_hash, role)
-    values (${fullName}, ${email}, ${passwordHash}, 'super_admin')
-  `;
+  try {
+    await sql`
+      insert into profiles (full_name, email, password_hash, role)
+      values (${fullName}, ${email}, ${passwordHash}, 'super_admin')
+    `;
+  } catch (err) {
+    // A concurrent request may have won the race despite the count check
+    // above — profiles_one_super_admin (db/schema.sql) is the real guard.
+    if ((err as { code?: string })?.code === "23505") {
+      throw new Error("Setup was just completed by someone else. Sign in instead.");
+    }
+    throw err;
+  }
 
   await signIn("credentials", { email, password, redirectTo: "/admin" });
   redirect("/admin");
