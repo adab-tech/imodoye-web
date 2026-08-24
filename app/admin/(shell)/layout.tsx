@@ -1,14 +1,20 @@
 import Link from "next/link";
-import { auth, signOut } from "@/lib/auth";
+import { auth, signOut, OWNER_ROLES } from "@/lib/auth";
 
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/review", label: "Editorial Review" },
   { href: "/admin/issues", label: "Issues" },
+  { href: "/admin/posts", label: "Posts" },
   { href: "/admin/fellows", label: "Fellows" },
   { href: "/admin/cohorts", label: "Residency Archive" },
   { href: "/admin/partners", label: "Partners" },
   { href: "/admin/publications", label: "Publications" },
+];
+
+const OWNER_NAV_ITEMS = [
+  { href: "/admin/team", label: "Team" },
+  { href: "/admin/settings", label: "Settings" },
 ];
 
 export default async function AdminShellLayout({
@@ -17,6 +23,7 @@ export default async function AdminShellLayout({
   children: React.ReactNode;
 }) {
   const session = await auth();
+  const isOwner = session?.user?.role && OWNER_ROLES.includes(session.user.role);
 
   return (
     <div className="min-h-screen flex bg-manuscript">
@@ -34,6 +41,20 @@ export default async function AdminShellLayout({
               {item.label}
             </Link>
           ))}
+          {isOwner && (
+            <>
+              <div className="my-2 border-t border-ink/10" />
+              {OWNER_NAV_ITEMS.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="font-ui text-sm px-3 py-2 rounded-sm opacity-75 hover:opacity-100 hover:bg-ink/5"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </>
+          )}
         </nav>
         <div className="pt-4 border-t border-ink/10">
           <p className="font-ui text-sm mb-1">{session?.user?.name}</p>

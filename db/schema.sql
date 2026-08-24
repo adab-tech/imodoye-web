@@ -229,6 +229,14 @@ create table pages (
   updated_at timestamptz not null default now()
 );
 
+-- Small editable numbers that don't warrant their own table (e.g. the
+-- Impact stats on /about) — admin-settable, public pages fall back to a
+-- "—" placeholder when a key is unset rather than showing a stale number.
+create table site_settings (
+  key text primary key,
+  value text
+);
+
 create table events (
   id uuid primary key default gen_random_uuid(),
   title text not null,

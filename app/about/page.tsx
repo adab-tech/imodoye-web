@@ -5,10 +5,12 @@ export const metadata = { title: "About — Imodoye" };
 export const revalidate = 60;
 
 export default async function AboutPage() {
-  const [[{ count: cohortsCompleted }], partners] = await Promise.all([
+  const [[{ count: cohortsCompleted }], partners, settingsRows] = await Promise.all([
     sql`select count(*)::int as count from cohorts`,
     sql`select name from partners order by category, name`,
+    sql`select key, value from site_settings where key in ('writers_supported', 'states_represented')`,
   ]);
+  const settings = Object.fromEntries(settingsRows.map((r) => [r.key, r.value]));
 
   return (
     <section className="px-6 py-16 md:px-16 max-w-2xl">
@@ -33,15 +35,15 @@ export default async function AboutPage() {
           <p className="font-ui text-sm opacity-60">Cohorts completed</p>
         </div>
         <div>
-          {/* Not wired to a fellow count yet — the admin roster is still
-              partial (3 of 7 cohorts entered), and a live count would
-              understate the real total rather than show it. Revisit once
-              the roster is complete; see docs/content-brief.md. */}
-          <p className="font-display text-3xl opacity-40">—</p>
+          <p className={`font-display text-3xl ${settings.writers_supported ? "" : "opacity-40"}`}>
+            {settings.writers_supported ?? "—"}
+          </p>
           <p className="font-ui text-sm opacity-60">Writers supported</p>
         </div>
         <div>
-          <p className="font-display text-3xl opacity-40">—</p>
+          <p className={`font-display text-3xl ${settings.states_represented ? "" : "opacity-40"}`}>
+            {settings.states_represented ?? "—"}
+          </p>
           <p className="font-ui text-sm opacity-60">States represented</p>
         </div>
       </div>

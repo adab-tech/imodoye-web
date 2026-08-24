@@ -1,20 +1,28 @@
 import Link from "next/link";
 import { sql } from "@/lib/db";
+import { auth, OWNER_ROLES } from "@/lib/auth";
 
 export const metadata = { title: "Dashboard — Imodoye Admin" };
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
-  const [[fellows], [partners], [publications]] = await Promise.all([
+  const session = await auth();
+  const isOwner = session?.user?.role && OWNER_ROLES.includes(session.user.role);
+
+  const [[fellows], [partners], [publications], [posts], [team]] = await Promise.all([
     sql`select count(*)::int as count from fellows`,
     sql`select count(*)::int as count from partners`,
-    sql`select count(*)::int as count from publications`,
+    sql`select count(*)::int as count from publication_entries`,
+    sql`select count(*)::int as count from posts`,
+    sql`select count(*)::int as count from profiles where role != 'public'`,
   ]);
 
   const cards = [
     { label: "Fellows", count: fellows.count, href: "/admin/fellows" },
     { label: "Partners", count: partners.count, href: "/admin/partners" },
     { label: "Publications", count: publications.count, href: "/admin/publications" },
+    { label: "Posts", count: posts.count, href: "/admin/posts" },
+    ...(isOwner ? [{ label: "Team", count: team.count, href: "/admin/team" }] : []),
   ];
 
   return (

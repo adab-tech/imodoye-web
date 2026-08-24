@@ -4,6 +4,7 @@ const FOOTER_LINKS = [
   { href: "/fellows", label: "Fellows" },
   { href: "/residency/archive", label: "Residency Archive" },
   { href: "/publications", label: "Publications" },
+  { href: "/posts", label: "News & Updates" },
   { href: "/partners", label: "Partners & Supporters" },
 ];
 

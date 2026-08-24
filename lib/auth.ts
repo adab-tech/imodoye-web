@@ -81,6 +81,9 @@ export async function requireRole(allowed: readonly AdminRole[]) {
 export const CONTENT_ROLES = ADMIN_ROLES.filter((r) => r !== "reviewer");
 // Everyone except "content_editor" — the inverse split for the review queue.
 export const REVIEW_ROLES = ADMIN_ROLES.filter((r) => r !== "content_editor");
+// Only super_admin and programme_director can create/manage other admin
+// accounts or change sitewide settings — the top of the role hierarchy.
+export const OWNER_ROLES: readonly AdminRole[] = ["super_admin", "programme_director"];
 
 declare module "@auth/core/types" {
   interface User {
