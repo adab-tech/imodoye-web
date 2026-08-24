@@ -4,7 +4,7 @@ const NAV_ITEMS = [
   { href: "/about", label: "About" },
   { href: "/residency", label: "Residency" },
   { href: "/fellows", label: "Fellows" },
-  { href: "https://review.imodoye.ng", label: "Imodoye Review" },
+  { href: "/review", label: "Imodoye Review" },
 ];
 
 export default function SiteNav() {

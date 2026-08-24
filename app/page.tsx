@@ -20,12 +20,12 @@ export default function HomePage() {
           >
             Explore the residency
           </Link>
-          <a
-            href="https://review.imodoye.ng"
+          <Link
+            href="/review"
             className="font-ui text-sm px-6 py-3 border border-ink text-ink rounded-sm"
           >
             Read the Review
-          </a>
+          </Link>
         </div>
       </section>
 
@@ -37,12 +37,12 @@ export default function HomePage() {
         <p className="font-ui text-lg mb-8 opacity-80">
           Words that mend the world.
         </p>
-        <a
-          href="https://review.imodoye.ng"
+        <Link
+          href="/review"
           className="font-ui text-sm px-6 py-3 bg-terracotta text-paper rounded-sm inline-block"
         >
           Read the Review
-        </a>
+        </Link>
       </section>
     </>
   );
