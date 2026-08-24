@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { submitApplication } from "./actions";
 
 const STEPS = [
   "Personal info",
@@ -10,15 +11,26 @@ const STEPS = [
   "Review & submit",
 ];
 
+const inputClass = "w-full px-3 py-2 border border-ink/20 rounded-sm bg-paper font-ui text-sm";
+
 export default function ApplyPage() {
   const [step, setStep] = useState(0);
-  const [saved, setSaved] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [country, setCountry] = useState("");
+  const [writingBackground, setWritingBackground] = useState("");
+  const [projectProposal, setProjectProposal] = useState("");
+  const [sampleFile, setSampleFile] = useState<File | null>(null);
+
   const next = () => setStep((s) => Math.min(s + 1, STEPS.length - 1));
   const back = () => setStep((s) => Math.max(s - 1, 0));
 
-  // TODO: replace with real form state + Supabase insert into `applications`
-  // once the project exists. Each step below should write to that state
-  // object instead of rendering empty inputs.
+  const canContinue =
+    (step === 0 && fullName.trim() && email.trim()) ||
+    (step === 1 && writingBackground.trim()) ||
+    (step === 2 && projectProposal.trim()) ||
+    (step === 3 && sampleFile) ||
+    step === 4;
 
   return (
     <section className="px-6 py-16 md:px-16 max-w-xl mx-auto">
@@ -52,89 +64,108 @@ export default function ApplyPage() {
         Step {step + 1} of {STEPS.length} — {STEPS[step]}
       </p>
 
-      <div className="bg-paper rounded p-8 mb-8">
-        {step === 0 && (
-          <div className="space-y-4">
-            {["Full name", "Email", "Country"].map((f) => (
-              <div key={f}>
-                <label className="font-ui text-sm block mb-1 opacity-75">
-                  {f}
-                </label>
-                <div className="h-10 border border-ink/20 rounded-sm bg-manuscript" />
-              </div>
-            ))}
+      <form action={submitApplication}>
+        {/* All fields stay mounted across steps (just hidden via CSS) so
+            nothing is lost when moving back and forth, and the final
+            native form submission carries every value at once. */}
+        <div className="bg-paper rounded p-8 mb-8">
+          <div className={step === 0 ? "space-y-4" : "hidden"}>
+            <div>
+              <label className="font-ui text-sm block mb-1 opacity-75">Full name</label>
+              <input name="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} required className={inputClass} />
+            </div>
+            <div>
+              <label className="font-ui text-sm block mb-1 opacity-75">Email</label>
+              <input name="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className={inputClass} />
+            </div>
+            <div>
+              <label className="font-ui text-sm block mb-1 opacity-75">Country</label>
+              <input name="country" value={country} onChange={(e) => setCountry(e.target.value)} className={inputClass} />
+            </div>
           </div>
-        )}
-        {step === 1 && (
-          <div className="space-y-3">
+
+          <div className={step === 1 ? "space-y-3" : "hidden"}>
             <p className="font-ui text-sm opacity-75">
               Genre, publication history, prior residencies.
             </p>
-            <div className="h-24 border border-ink/20 rounded-sm bg-manuscript" />
+            <textarea
+              name="writingBackground"
+              value={writingBackground}
+              onChange={(e) => setWritingBackground(e.target.value)}
+              rows={5}
+              className={inputClass}
+            />
           </div>
-        )}
-        {step === 2 && (
-          <div className="space-y-3">
+
+          <div className={step === 2 ? "space-y-3" : "hidden"}>
             <p className="font-ui text-sm opacity-75">
               What will you work on during the residency?
             </p>
-            <div className="h-36 border border-ink/20 rounded-sm bg-manuscript" />
+            <textarea
+              name="projectProposal"
+              value={projectProposal}
+              onChange={(e) => setProjectProposal(e.target.value)}
+              rows={7}
+              className={inputClass}
+            />
           </div>
-        )}
-        {step === 3 && (
-          <div className="space-y-3">
-            <p className="font-ui text-sm opacity-75">
-              Upload up to 10 pages of unpublished or published work.
-            </p>
-            <div className="h-24 border border-dashed border-ink/40 rounded-sm flex items-center justify-center font-mono text-sm opacity-60">
-              drop file — .pdf / .docx
-            </div>
-          </div>
-        )}
-        {step === 4 && (
-          <div className="space-y-2 font-mono text-sm opacity-75">
-            <p>NAME — [pending input]</p>
-            <p>COUNTRY — [pending input]</p>
-            <p>PROJECT — [pending input]</p>
-            <p>SAMPLE — [pending upload]</p>
-          </div>
-        )}
-      </div>
 
-      <div className="flex justify-between items-center">
-        <button
-          onClick={back}
-          disabled={step === 0}
-          className={`font-ui text-sm bg-transparent border-none ${
-            step === 0 ? "opacity-30" : "opacity-70 cursor-pointer"
-          }`}
-        >
-          ← Back
-        </button>
-        <div className="flex gap-3 items-center">
-          {saved && (
-            <span className="font-mono text-xs text-palm">Draft saved</span>
-          )}
-          <button
-            onClick={() => setSaved(true)}
-            className="font-ui text-sm text-indigo bg-transparent border-none cursor-pointer"
-          >
-            Save &amp; exit
-          </button>
-          {step < STEPS.length - 1 ? (
-            <button
-              onClick={next}
-              className="font-ui text-sm px-6 py-3 bg-indigo text-paper rounded-sm"
-            >
-              Continue
-            </button>
-          ) : (
-            <button className="font-ui text-sm px-6 py-3 bg-terracotta text-paper rounded-sm">
-              Submit application
-            </button>
-          )}
+          <div className={step === 3 ? "space-y-3" : "hidden"}>
+            <p className="font-ui text-sm opacity-75">
+              Upload up to 10 pages of unpublished or published work (.pdf or .docx).
+            </p>
+            <label className="h-24 border border-dashed border-ink/40 rounded-sm flex items-center justify-center font-mono text-sm opacity-60 cursor-pointer">
+              {sampleFile ? sampleFile.name : "choose a file — .pdf / .docx"}
+              <input
+                type="file"
+                name="sample"
+                accept=".pdf,.doc,.docx"
+                onChange={(e) => setSampleFile(e.target.files?.[0] ?? null)}
+                className="hidden"
+              />
+            </label>
+          </div>
+
+          <div className={step === 4 ? "space-y-2 font-mono text-sm opacity-75" : "hidden"}>
+            <p>NAME — {fullName || "—"}</p>
+            <p>EMAIL — {email || "—"}</p>
+            <p>COUNTRY — {country || "—"}</p>
+            <p>SAMPLE — {sampleFile?.name || "—"}</p>
+          </div>
         </div>
-      </div>
+
+        <div className="flex justify-between items-center">
+          <button
+            type="button"
+            onClick={back}
+            disabled={step === 0}
+            className={`font-ui text-sm bg-transparent border-none ${
+              step === 0 ? "opacity-30" : "opacity-70 cursor-pointer"
+            }`}
+          >
+            ← Back
+          </button>
+          <div className="flex gap-3 items-center">
+            {step < STEPS.length - 1 ? (
+              <button
+                type="button"
+                onClick={next}
+                disabled={!canContinue}
+                className="font-ui text-sm px-6 py-3 bg-indigo text-paper rounded-sm disabled:opacity-40"
+              >
+                Continue
+              </button>
+            ) : (
+              <button
+                type="submit"
+                className="font-ui text-sm px-6 py-3 bg-terracotta text-paper rounded-sm"
+              >
+                Submit application
+              </button>
+            )}
+          </div>
+        </div>
+      </form>
     </section>
   );
 }

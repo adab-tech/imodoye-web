@@ -5,6 +5,7 @@ const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/review", label: "Editorial Review" },
   { href: "/admin/issues", label: "Issues" },
+  { href: "/admin/applications", label: "Applications" },
   { href: "/admin/posts", label: "Posts" },
   { href: "/admin/fellows", label: "Fellows" },
   { href: "/admin/cohorts", label: "Residency Archive" },
