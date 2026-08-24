@@ -1,9 +1,12 @@
 -- IMODOYE — core schema
 -- Implements workplan.md §3 (data model), §4 (editorial workflow),
 -- §5 (RBAC), and the theme-per-issue correction.
--- Run against a Supabase Postgres project. Nothing here is applied
--- automatically — this file is generated but not executed against any
--- live project without explicit go-ahead (see workplan.md §9 checkpoints).
+-- Runs against plain Postgres (Neon). Auth is not yet wired up — profiles.id
+-- is a standalone uuid for now; link it to whichever auth provider is chosen
+-- (Neon Auth or otherwise) when real login is built. The RLS policies below
+-- assume a Supabase-style auth.uid() function that Neon doesn't provide out
+-- of the box — they're kept as a reference for the shape of the access rules
+-- but are commented out until an equivalent is wired up at the app layer.
 
 -- ============ ROLES ============
 create type user_role as enum (
@@ -19,12 +22,13 @@ create type user_role as enum (
 );
 
 create table profiles (
-  id uuid primary key references auth.users(id) on delete cascade,
+  id uuid primary key default gen_random_uuid(),
   full_name text not null,
   role user_role not null default 'public',
   avatar_url text,
   bio text,
   location text,
+  state text,
   country text,
   socials jsonb default '{}',
   created_at timestamptz not null default now()
@@ -207,6 +211,22 @@ create table media (
   created_at timestamptz not null default now()
 );
 
+-- ============ PARTNERS & SUPPORTERS ============
+create type partner_category as enum (
+  'donor', 'cultural_institution', 'university'
+);
+
+create table partners (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  category partner_category not null,
+  logo_url text,
+  url text,
+  blurb text,
+  featured boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
 -- ============ OPERATIONAL ============
 create table notifications (
   id uuid primary key default gen_random_uuid(),
@@ -226,26 +246,30 @@ create table audit_logs (
   created_at timestamptz not null default now()
 );
 
--- ============ ROW LEVEL SECURITY (starter policies) ============
-alter table profiles enable row level security;
-alter table applications enable row level security;
-alter table submissions enable row level security;
-alter table submission_reviews enable row level security;
-
--- Fellows/applicants see only their own applications.
-create policy "own applications" on applications
-  for select using (auth.uid() = applicant_id);
-
--- Writers see only their own submissions.
-create policy "own submissions" on submissions
-  for select using (auth.uid() = author_id);
-
--- Reviewers see submissions assigned to them, but the policy alone does not
--- expose author identity to the client — application code must additionally
--- omit author_id from any reviewer-facing query (blind review is enforced
--- at both the RLS and the query-shape level).
-create policy "assigned reviewer access" on submissions
-  for select using (auth.uid() = assigned_reviewer_id);
-
--- Admin/editorial roles: broaden with a role-check helper in application code
--- or a dedicated policy per role once the roles table is finalized with the team.
+-- ============ ROW LEVEL SECURITY (starter policies — reference only) ============
+-- Left commented out: these assume Supabase's auth.uid(), which has no
+-- equivalent on plain Neon Postgres. Re-enable once the app's auth
+-- provider is chosen and an equivalent current-user function exists.
+--
+-- alter table profiles enable row level security;
+-- alter table applications enable row level security;
+-- alter table submissions enable row level security;
+-- alter table submission_reviews enable row level security;
+--
+-- -- Fellows/applicants see only their own applications.
+-- create policy "own applications" on applications
+--   for select using (auth.uid() = applicant_id);
+--
+-- -- Writers see only their own submissions.
+-- create policy "own submissions" on submissions
+--   for select using (auth.uid() = author_id);
+--
+-- -- Reviewers see submissions assigned to them, but the policy alone does not
+-- -- expose author identity to the client — application code must additionally
+-- -- omit author_id from any reviewer-facing query (blind review is enforced
+-- -- at both the RLS and the query-shape level).
+-- create policy "assigned reviewer access" on submissions
+--   for select using (auth.uid() = assigned_reviewer_id);
+--
+-- -- Admin/editorial roles: broaden with a role-check helper in application code
+-- -- or a dedicated policy per role once the roles table is finalized with the team.
