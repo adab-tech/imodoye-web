@@ -1,4 +1,5 @@
 import { PARTNER_CATEGORIES, PARTNER_CATEGORY_LABELS, type PartnerCategoryDb } from "@/lib/categories";
+import RichTextEditor from "../posts/RichTextEditor";
 
 export type PartnerFormValues = {
   name?: string;
@@ -52,12 +53,7 @@ export default function PartnerForm({
 
       <div>
         <label className="block font-ui text-sm mb-1 opacity-70">Blurb (optional)</label>
-        <textarea
-          name="blurb"
-          defaultValue={values?.blurb}
-          rows={2}
-          className="w-full px-3 py-2 border border-ink/15 rounded-sm font-ui text-sm"
-        />
+        <RichTextEditor name="blurb" defaultValue={values?.blurb} />
       </div>
 
       <div>

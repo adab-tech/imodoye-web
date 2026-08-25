@@ -29,7 +29,10 @@ export default async function PartnersPage() {
                   <li key={p.name} className="font-ui text-lg">
                     {p.name}
                     {p.blurb && (
-                      <span className="block font-ui text-sm opacity-60 mt-1">{p.blurb}</span>
+                      <div
+                        className="prose-post font-ui text-sm opacity-60 mt-1"
+                        dangerouslySetInnerHTML={{ __html: p.blurb }}
+                      />
                     )}
                   </li>
                 ))}

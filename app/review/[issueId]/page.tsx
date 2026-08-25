@@ -41,7 +41,10 @@ export default async function IssuePage({
             : issue.status.toUpperCase()}
         </p>
         <h1 className="font-display text-5xl mb-3">{issue.theme}</h1>
-        <p className="font-ui mb-10 opacity-65 max-w-md">{issue.note}</p>
+        <div
+          className="prose-post font-ui mb-10 opacity-65 max-w-md"
+          dangerouslySetInnerHTML={{ __html: issue.note }}
+        />
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-10">
           {issue.open_categories.map((c: string) => (

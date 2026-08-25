@@ -1,3 +1,5 @@
+import RichTextEditor from "../posts/RichTextEditor";
+
 const COHORTS = Array.from({ length: 7 }, (_, i) => i + 1);
 
 export type FellowFormValues = {
@@ -87,12 +89,7 @@ export default function FellowForm({
 
       <div>
         <label className="block font-ui text-sm mb-1 opacity-70">Bio</label>
-        <textarea
-          name="bio"
-          defaultValue={values?.bio}
-          rows={4}
-          className="w-full px-3 py-2 border border-ink/15 rounded-sm font-ui text-sm"
-        />
+        <RichTextEditor name="bio" defaultValue={values?.bio} />
       </div>
 
       <div>

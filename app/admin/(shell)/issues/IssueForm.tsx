@@ -1,3 +1,5 @@
+import RichTextEditor from "../posts/RichTextEditor";
+
 export type IssueFormValues = {
   number?: number;
   theme?: string;
@@ -37,7 +39,7 @@ export default function IssueForm({
 
       <div>
         <label className="block font-ui text-sm mb-1 opacity-70">Note</label>
-        <textarea name="note" defaultValue={values?.note} rows={2} required className="w-full px-3 py-2 border border-ink/15 rounded-sm font-ui text-sm" />
+        <RichTextEditor name="note" defaultValue={values?.note} />
       </div>
 
       <div>

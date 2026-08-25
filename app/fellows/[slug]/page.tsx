@@ -55,9 +55,10 @@ export default async function FellowProfilePage({
       </div>
 
       {fellow.bio && (
-        <p className="font-ui mb-8 max-w-lg opacity-80 leading-relaxed">
-          {fellow.bio}
-        </p>
+        <div
+          className="prose-post font-ui mb-8 max-w-lg opacity-80 leading-relaxed"
+          dangerouslySetInnerHTML={{ __html: fellow.bio }}
+        />
       )}
 
       {works.length > 0 && (
