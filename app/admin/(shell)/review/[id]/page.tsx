@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { sql } from "@/lib/db";
-import { submitReview, claimForReview, savePublication, COMPOSABLE_STAGES } from "../actions";
+import { submitReview, claimForReview, savePublication } from "../actions";
 import RichTextEditor from "../../posts/RichTextEditor";
+import { COMPOSABLE_STAGES } from "@/lib/categories";
 
 export const metadata = { title: "Blind review — Imodoye Admin" };
 export const dynamic = "force-dynamic";

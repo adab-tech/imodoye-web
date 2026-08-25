@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { sql } from "@/lib/db";
 import { requireRole, REVIEW_ROLES } from "@/lib/auth";
+import { COMPOSABLE_STAGES } from "@/lib/categories";
 
 const STAGE_FOR_RECOMMENDATION: Record<string, string> = {
   reject: "rejected",
@@ -12,11 +13,6 @@ const STAGE_FOR_RECOMMENDATION: Record<string, string> = {
 };
 
 const CLAIMABLE_STAGES = ["received", "screening"];
-
-// Once shortlisted, a piece can be composed for publication. This is a
-// pragmatic subset of the 13-value submission_stage enum — it doesn't model
-// every granular editorial handoff, just draft-in-progress vs. live.
-export const COMPOSABLE_STAGES = ["shortlisted", "copyediting", "proofing", "scheduled", "published"];
 
 function slugify(title: string) {
   return title

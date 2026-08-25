@@ -25,3 +25,8 @@ export const POST_CATEGORIES = [
   "Press",
 ] as const;
 export type PostCategory = (typeof POST_CATEGORIES)[number];
+
+// Once a submission reaches one of these submission_stage values, it can be
+// composed for publication. A pragmatic subset of the 13-value enum — draft
+// vs. live — not a model of every granular editorial handoff.
+export const COMPOSABLE_STAGES = ["shortlisted", "copyediting", "proofing", "scheduled", "published"];
