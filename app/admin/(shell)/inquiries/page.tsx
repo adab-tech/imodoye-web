@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { sql } from "@/lib/db";
 import { markInquiryStatus, deleteInquiry } from "./actions";
 
@@ -26,6 +27,9 @@ export default async function AdminInquiriesPage() {
             </div>
             <p className="font-ui text-sm opacity-80 mb-4 whitespace-pre-wrap">{i.message}</p>
             <div className="flex gap-3">
+              <Link href={`/admin/inquiries/${i.id}`} className="font-mono text-xs underline text-indigo">
+                reply
+              </Link>
               {i.status !== "read" && (
                 <form action={markInquiryStatus.bind(null, i.id, "read")}>
                   <button type="submit" className="font-mono text-xs underline opacity-60">mark read</button>

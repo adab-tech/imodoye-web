@@ -1,12 +1,13 @@
 import { sql } from "@/lib/db";
-import { approveComment, deleteComment } from "./actions";
+import { approveComment, deleteComment, replyToComment } from "./actions";
+import ReplyToggle from "./ReplyToggle";
 
 export const metadata = { title: "Comments — Imodoye Admin" };
 export const dynamic = "force-dynamic";
 
 export default async function AdminCommentsPage() {
   const comments = await sql`
-    select c.id, c.author_name, c.author_email, c.body, c.approved, c.created_at, p.title, p.slug
+    select c.id, c.author_name, c.author_email, c.body, c.approved, c.replied_at, c.created_at, p.title, p.slug
     from post_comments c
     left join posts p on p.id = c.post_id
     order by c.approved asc, c.created_at desc
@@ -27,10 +28,11 @@ export default async function AdminCommentsPage() {
               </div>
               <span className={`font-mono text-xs ${c.approved ? "text-palm" : "text-terracotta"}`}>
                 {c.approved ? "APPROVED" : "PENDING"}
+                {c.replied_at && " · REPLIED"}
               </span>
             </div>
             <p className="font-ui text-sm opacity-80 mb-4 whitespace-pre-wrap">{c.body}</p>
-            <div className="flex gap-3">
+            <div className="flex gap-3 items-start">
               {!c.approved && (
                 <form action={approveComment.bind(null, c.id, c.slug)}>
                   <button type="submit" className="font-mono text-xs underline opacity-60">approve</button>
@@ -39,6 +41,7 @@ export default async function AdminCommentsPage() {
               <form action={deleteComment.bind(null, c.id, c.slug)}>
                 <button type="submit" className="font-mono text-xs underline text-terracotta">delete</button>
               </form>
+              <ReplyToggle action={replyToComment.bind(null, c.id)} />
             </div>
           </div>
         ))}

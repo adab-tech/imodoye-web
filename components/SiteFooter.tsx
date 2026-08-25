@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { subscribeToNewsletter } from "@/app/subscribe/actions";
 
 const FOOTER_LINKS = [
   { href: "/fellows", label: "Fellows" },
@@ -20,6 +21,20 @@ export default function SiteFooter() {
           </Link>
         ))}
       </nav>
+
+      <form action={subscribeToNewsletter} className="flex flex-wrap gap-2 mb-10 max-w-sm">
+        <input
+          name="email"
+          type="email"
+          required
+          placeholder="Your email"
+          className="flex-1 min-w-0 px-3 py-2 rounded-sm bg-manuscript/10 border border-manuscript/25 font-ui text-sm placeholder:text-manuscript/50"
+        />
+        <button type="submit" className="font-ui text-sm px-4 py-2 bg-terracotta text-paper rounded-sm">
+          Subscribe
+        </button>
+      </form>
+
       <p className="font-mono text-xs opacity-60">
         imodoye.ng · © {new Date().getFullYear()} Imodoye Writers Residency
       </p>

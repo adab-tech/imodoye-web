@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { sql } from "@/lib/db";
 import { requireRole, CONTENT_ROLES } from "@/lib/auth";
+import { sendEmail } from "@/lib/email";
 
 const APPLICATION_STAGES = [
   "new",
@@ -21,5 +22,22 @@ export async function updateApplicationStage(id: string, formData: FormData) {
 
   await sql`update applications set stage = ${stage} where id = ${id}`;
   revalidatePath("/admin/applications");
+  revalidatePath(`/admin/applications/${id}`);
+}
+
+export async function emailApplicant(id: string, formData: FormData) {
+  await requireRole(CONTENT_ROLES);
+  const subject = String(formData.get("subject") ?? "").trim();
+  const body = String(formData.get("body") ?? "").trim();
+  if (!subject || !body) throw new Error("Subject and message are required.");
+
+  const rows = await sql`
+    select p.email from applications a join profiles p on p.id = a.applicant_id where a.id = ${id}
+  `;
+  const email = rows[0]?.email;
+  if (!email) throw new Error("This applicant has no email on file.");
+
+  await sendEmail({ to: email, subject, html: body });
+  await sql`update applications set last_contacted_at = now() where id = ${id}`;
   revalidatePath(`/admin/applications/${id}`);
 }

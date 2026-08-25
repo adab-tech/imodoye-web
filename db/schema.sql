@@ -100,6 +100,7 @@ create table applications (
   writing_sample_url text,
   composite_score numeric,
   submitted_at timestamptz,
+  last_contacted_at timestamptz, -- last time admin emailed this applicant, see app/admin/(shell)/applications
   created_at timestamptz not null default now()
 );
 
@@ -272,6 +273,18 @@ create table post_comments (
   author_email text not null,
   body text not null,
   approved boolean not null default false,
+  replied_at timestamptz, -- last time admin emailed this commenter
+  created_at timestamptz not null default now()
+);
+
+-- Opt-in newsletter list (footer signup at /subscribe). unsubscribe_token
+-- is a standalone random value, not the row id, so an unsubscribe link
+-- never doubles as a way to enumerate or guess other subscribers' ids.
+create table subscribers (
+  id uuid primary key default gen_random_uuid(),
+  email text not null unique,
+  name text,
+  unsubscribe_token text not null unique,
   created_at timestamptz not null default now()
 );
 

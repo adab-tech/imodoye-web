@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { sql } from "@/lib/db";
-import { updateApplicationStage } from "../actions";
+import { updateApplicationStage, emailApplicant } from "../actions";
+import RichTextEditor from "../../posts/RichTextEditor";
 
 export const metadata = { title: "Application — Imodoye Admin" };
 export const dynamic = "force-dynamic";
@@ -17,6 +18,8 @@ export default async function ApplicationDetailPage({ params }: { params: { id: 
   `;
   const app = rows[0];
   if (!app) return notFound();
+
+  const boundEmail = emailApplicant.bind(null, params.id);
 
   return (
     <div className="max-w-xl">
@@ -46,10 +49,36 @@ export default async function ApplicationDetailPage({ params }: { params: { id: 
       </div>
 
       {app.writing_sample_url && (
-        <a href={app.writing_sample_url} target="_blank" rel="noreferrer" className="font-ui text-sm text-indigo underline">
+        <a href={app.writing_sample_url} target="_blank" rel="noreferrer" className="font-ui text-sm text-indigo underline mb-8 inline-block">
           View writing sample →
         </a>
       )}
+
+      <div className="bg-paper rounded p-6">
+        <p className="font-mono text-xs mb-4 opacity-50">
+          EMAIL APPLICANT
+          {app.last_contacted_at &&
+            ` · LAST CONTACTED ${new Date(app.last_contacted_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`}
+        </p>
+        <form action={boundEmail} className="space-y-4">
+          <div>
+            <label className="block font-ui text-sm mb-1 opacity-70">Subject</label>
+            <input
+              name="subject"
+              required
+              defaultValue="Your Imodoye Fellowship application"
+              className="w-full px-3 py-2 border border-ink/15 rounded-sm font-ui text-sm"
+            />
+          </div>
+          <div>
+            <label className="block font-ui text-sm mb-1 opacity-70">Message</label>
+            <RichTextEditor name="body" />
+          </div>
+          <button type="submit" className="font-ui text-sm px-4 py-2 bg-indigo text-paper rounded-sm">
+            Send email
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
