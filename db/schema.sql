@@ -139,6 +139,7 @@ create type submission_stage as enum (
 create table submissions (
   id uuid primary key default gen_random_uuid(),
   reference text not null unique, -- e.g. IR-2026-000184
+  title text,
   author_id uuid references profiles(id) on delete cascade,
   issue_id uuid references issues(id) on delete cascade,
   genre text not null,

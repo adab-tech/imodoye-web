@@ -11,6 +11,7 @@ function randomReference() {
 }
 
 export async function submitToIssue(issueId: string, formData: FormData) {
+  const title = String(formData.get("title") ?? "").trim();
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const genre = String(formData.get("genre") ?? "").trim();
@@ -19,8 +20,8 @@ export async function submitToIssue(issueId: string, formData: FormData) {
   const sampleText = String(formData.get("sampleText") ?? "").trim();
   const sampleFile = formData.get("sampleFile") as File | null;
 
-  if (!name || !email || !genre) {
-    throw new Error("Name, email, and genre are required.");
+  if (!title || !name || !email || !genre) {
+    throw new Error("Title, name, email, and genre are required.");
   }
   if (!sampleText && (!sampleFile || sampleFile.size === 0)) {
     throw new Error("Paste your submission or attach a file.");
@@ -41,8 +42,8 @@ export async function submitToIssue(issueId: string, formData: FormData) {
   for (let attempt = 0; attempt < 3 && !submissionId; attempt++) {
     try {
       const rows = await sql`
-        insert into submissions (reference, author_id, issue_id, genre, word_count, stage)
-        values (${reference}, ${authorId}, ${issueId}, ${genre}, ${wordCount}, 'received')
+        insert into submissions (reference, title, author_id, issue_id, genre, word_count, stage)
+        values (${reference}, ${title}, ${authorId}, ${issueId}, ${genre}, ${wordCount}, 'received')
         returning id
       `;
       submissionId = rows[0].id;

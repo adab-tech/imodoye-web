@@ -19,6 +19,12 @@ export default async function IssuePage({
   const issue = rows[0];
   if (!issue) return notFound();
 
+  const pieces = await sql`
+    select title, slug, category, published_at from publications
+    where issue_id = ${issue.id} and published_at is not null
+    order by published_at desc
+  `;
+
   return (
     <section className="px-6 py-16 md:px-16 bg-ink text-manuscript min-h-[60vh]">
       <div className="max-w-2xl">
@@ -47,6 +53,24 @@ export default async function IssuePage({
             </div>
           ))}
         </div>
+
+        {pieces.length > 0 && (
+          <div className="mb-10">
+            <p className="font-mono text-xs mb-4 opacity-50">IN THIS ISSUE</p>
+            <div className="space-y-4">
+              {pieces.map((p) => (
+                <Link
+                  key={p.slug}
+                  href={`/review/${params.issueId}/${p.slug}`}
+                  className="block p-4 border border-manuscript/15 rounded-sm hover:border-manuscript/40"
+                >
+                  <p className="font-mono text-xs mb-1 opacity-50">{p.category?.toUpperCase()}</p>
+                  <p className="font-display text-xl">{p.title}</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {issue.status === "current" ? (
           <SubmitForm issueId={issue.id} categories={issue.open_categories} />

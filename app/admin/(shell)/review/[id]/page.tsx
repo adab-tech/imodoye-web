@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { sql } from "@/lib/db";
-import { submitReview, claimForReview } from "../actions";
+import { submitReview, claimForReview, savePublication, COMPOSABLE_STAGES } from "../actions";
+import RichTextEditor from "../../posts/RichTextEditor";
 
 export const metadata = { title: "Blind review — Imodoye Admin" };
 export const dynamic = "force-dynamic";
@@ -10,27 +11,34 @@ export default async function BlindReviewPage({ params }: { params: { id: string
   // Explicit column list — deliberately excludes author_id. Blind review
   // depends on this query never having the author's identity to leak,
   // not just on the JSX choosing not to render it (see db/schema.sql).
-  const [rows, files, priorReviews] = await Promise.all([
-    sql`select id, reference, genre, word_count, stage from submissions where id = ${params.id}`,
+  const [rows, files, priorReviews, publicationRows] = await Promise.all([
+    sql`
+      select s.id, s.reference, s.title, s.genre, s.word_count, s.stage, i.number as issue_number
+      from submissions s join issues i on i.id = s.issue_id
+      where s.id = ${params.id}
+    `,
     sql`select storage_path, file_type from submission_files where submission_id = ${params.id}`,
     sql`
       select rating, recommendation, notes, created_at from submission_reviews
       where submission_id = ${params.id} order by created_at desc
     `,
+    sql`select title, body, slug, published_at from publications where submission_id = ${params.id}`,
   ]);
   const submission = rows[0];
   if (!submission) return notFound();
+  const publication = publicationRows[0];
 
   const boundSubmit = submitReview.bind(null, params.id);
   const boundClaim = claimForReview.bind(null, params.id);
+  const boundSavePublication = savePublication.bind(null, params.id);
 
   return (
-    <div className="max-w-xl">
+    <div className="max-w-3xl">
       <Link href="/admin/review" className="font-ui text-sm opacity-60 mb-6 inline-block">
         ← Editorial queue
       </Link>
 
-      <div className="bg-paper rounded p-6 mb-6">
+      <div className="max-w-xl bg-paper rounded p-6 mb-6">
         <p className="font-mono text-xs mb-4 opacity-50">
           SUBMISSION {submission.reference} — BLIND REVIEW
         </p>
@@ -102,7 +110,7 @@ export default async function BlindReviewPage({ params }: { params: { id: string
       </div>
 
       {priorReviews.length > 0 && (
-        <div className="bg-paper rounded p-6">
+        <div className="max-w-xl bg-paper rounded p-6 mb-6">
           <p className="font-mono text-xs mb-4 opacity-50">REVIEW HISTORY</p>
           <div className="space-y-3">
             {priorReviews.map((r, i) => (
@@ -114,6 +122,53 @@ export default async function BlindReviewPage({ params }: { params: { id: string
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {COMPOSABLE_STAGES.includes(submission.stage) && (
+        <div className="bg-paper rounded p-6">
+          <p className="font-mono text-xs mb-4 opacity-50">
+            COMPOSE FOR PUBLICATION
+            {publication?.published_at ? " · LIVE" : publication ? " · DRAFT" : ""}
+          </p>
+
+          {publication?.published_at && (
+            <p className="font-ui text-sm mb-4">
+              Published at{" "}
+              <a
+                href={`/review/${submission.issue_number}/${publication.slug}`}
+                target="_blank"
+                rel="noreferrer"
+                className="text-indigo underline"
+              >
+                /review/{submission.issue_number}/{publication.slug}
+              </a>
+            </p>
+          )}
+
+          <form action={boundSavePublication} className="space-y-4">
+            <div>
+              <label className="block font-ui text-sm mb-1 opacity-70">Published title</label>
+              <input
+                name="title"
+                required
+                defaultValue={publication?.title ?? submission.title ?? ""}
+                className="w-full px-3 py-2 border border-ink/15 rounded-sm font-ui text-sm"
+              />
+            </div>
+            <div>
+              <label className="block font-ui text-sm mb-1 opacity-70">Final copy</label>
+              <RichTextEditor name="body" defaultValue={publication?.body ?? ""} />
+            </div>
+            <div className="flex gap-3">
+              <button type="submit" className="font-ui text-sm px-4 py-2 border border-ink/20 rounded-sm">
+                Save draft
+              </button>
+              <button name="publish" value="on" type="submit" className="font-ui text-sm px-4 py-2 bg-indigo text-paper rounded-sm">
+                {publication?.published_at ? "Update live piece" : "Publish"}
+              </button>
+            </div>
+          </form>
         </div>
       )}
     </div>

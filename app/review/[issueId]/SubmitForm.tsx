@@ -27,6 +27,10 @@ export default function SubmitForm({
   return (
     <form action={action} className="max-w-md space-y-4 border border-manuscript/15 rounded p-6">
       <div>
+        <label className="block font-ui text-sm mb-1 opacity-70">Title of the work</label>
+        <input name="title" required className="w-full px-3 py-2 bg-transparent border border-manuscript/25 rounded-sm font-ui text-sm" />
+      </div>
+      <div>
         <label className="block font-ui text-sm mb-1 opacity-70">Name</label>
         <input name="name" required className="w-full px-3 py-2 bg-transparent border border-manuscript/25 rounded-sm font-ui text-sm" />
       </div>
