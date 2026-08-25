@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { sql } from "@/lib/db";
 import { requireRole, CONTENT_ROLES } from "@/lib/auth";
 import { sendEmail } from "@/lib/email";
@@ -21,7 +22,11 @@ export async function replyToInquiry(id: string, formData: FormData) {
   const inquiry = rows[0];
   if (!inquiry) throw new Error("That inquiry no longer exists.");
 
-  await sendEmail({ to: inquiry.email, subject, html: body });
+  try {
+    await sendEmail({ to: inquiry.email, subject, html: body });
+  } catch (err) {
+    redirect(`/admin/inquiries/${id}?error=${encodeURIComponent((err as Error).message)}`);
+  }
   await sql`update inquiries set status = 'replied' where id = ${id}`;
 
   revalidatePath("/admin/inquiries");

@@ -8,7 +8,13 @@ export const dynamic = "force-dynamic";
 
 const STAGES = ["new", "screening", "shortlisted", "interview", "selected", "waitlist", "declined"];
 
-export default async function ApplicationDetailPage({ params }: { params: { id: string } }) {
+export default async function ApplicationDetailPage({
+  params,
+  searchParams,
+}: {
+  params: { id: string };
+  searchParams: { error?: string };
+}) {
   const rows = await sql`
     select a.*, p.full_name, p.email, p.country, c.number as cohort_number
     from applications a
@@ -60,6 +66,9 @@ export default async function ApplicationDetailPage({ params }: { params: { id: 
           {app.last_contacted_at &&
             ` · LAST CONTACTED ${new Date(app.last_contacted_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`}
         </p>
+        {searchParams.error && (
+          <p className="font-ui text-sm text-terracotta mb-4">{searchParams.error}</p>
+        )}
         <form action={boundEmail} className="space-y-4">
           <div>
             <label className="block font-ui text-sm mb-1 opacity-70">Subject</label>

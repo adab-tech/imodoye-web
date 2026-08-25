@@ -7,7 +7,13 @@ import RichTextEditor from "../../posts/RichTextEditor";
 export const metadata = { title: "Inquiry — Imodoye Admin" };
 export const dynamic = "force-dynamic";
 
-export default async function InquiryDetailPage({ params }: { params: { id: string } }) {
+export default async function InquiryDetailPage({
+  params,
+  searchParams,
+}: {
+  params: { id: string };
+  searchParams: { error?: string };
+}) {
   const rows = await sql`select * from inquiries where id = ${params.id}`;
   const inquiry = rows[0];
   if (!inquiry) return notFound();
@@ -33,6 +39,9 @@ export default async function InquiryDetailPage({ params }: { params: { id: stri
         <p className="font-mono text-xs mb-4 opacity-50">
           REPLY BY EMAIL {inquiry.status === "replied" ? "· ALREADY REPLIED" : ""}
         </p>
+        {searchParams.error && (
+          <p className="font-ui text-sm text-terracotta mb-4">{searchParams.error}</p>
+        )}
         <form action={boundReply} className="space-y-4">
           <div>
             <label className="block font-ui text-sm mb-1 opacity-70">Subject</label>

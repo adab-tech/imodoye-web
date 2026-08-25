@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { sql } from "@/lib/db";
 import { requireRole, CONTENT_ROLES } from "@/lib/auth";
 import { sendEmail } from "@/lib/email";
@@ -37,7 +38,11 @@ export async function emailApplicant(id: string, formData: FormData) {
   const email = rows[0]?.email;
   if (!email) throw new Error("This applicant has no email on file.");
 
-  await sendEmail({ to: email, subject, html: body });
+  try {
+    await sendEmail({ to: email, subject, html: body });
+  } catch (err) {
+    redirect(`/admin/applications/${id}?error=${encodeURIComponent((err as Error).message)}`);
+  }
   await sql`update applications set last_contacted_at = now() where id = ${id}`;
   revalidatePath(`/admin/applications/${id}`);
 }

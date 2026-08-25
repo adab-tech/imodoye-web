@@ -6,7 +6,11 @@ import RichTextEditor from "../../posts/RichTextEditor";
 export const metadata = { title: "Write a broadcast — Imodoye Admin" };
 export const dynamic = "force-dynamic";
 
-export default async function BroadcastPage() {
+export default async function BroadcastPage({
+  searchParams,
+}: {
+  searchParams: { error?: string };
+}) {
   const rows = await sql`select count(*) from subscribers`;
   const count = Number(rows[0].count);
 
@@ -20,6 +24,10 @@ export default async function BroadcastPage() {
       <p className="font-ui text-sm opacity-60 mb-6">
         Sends to all {count} subscriber{count === 1 ? "" : "s"}. Every email includes an unsubscribe link automatically.
       </p>
+
+      {searchParams.error && (
+        <p className="font-ui text-sm text-terracotta mb-4">{searchParams.error}</p>
+      )}
 
       <form action={sendBroadcastEmail} className="space-y-4 bg-paper rounded p-6">
         <div>

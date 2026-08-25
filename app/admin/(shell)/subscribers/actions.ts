@@ -21,7 +21,11 @@ export async function sendBroadcastEmail(formData: FormData) {
   const recipients = await sql`select email, unsubscribe_token from subscribers`;
   if (recipients.length === 0) throw new Error("There are no subscribers yet.");
 
-  await sendBroadcast(subject, body, recipients as { email: string; unsubscribe_token: string }[]);
+  try {
+    await sendBroadcast(subject, body, recipients as { email: string; unsubscribe_token: string }[]);
+  } catch (err) {
+    redirect(`/admin/subscribers/broadcast?error=${encodeURIComponent((err as Error).message)}`);
+  }
 
   revalidatePath("/admin/subscribers");
   redirect("/admin/subscribers?sent=1");

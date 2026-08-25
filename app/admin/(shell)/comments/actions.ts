@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { sql } from "@/lib/db";
 import { requireRole, CONTENT_ROLES } from "@/lib/auth";
 import { sendEmail } from "@/lib/email";
@@ -15,7 +16,11 @@ export async function replyToComment(id: string, formData: FormData) {
   const comment = rows[0];
   if (!comment) throw new Error("That comment no longer exists.");
 
-  await sendEmail({ to: comment.author_email, subject, html: body });
+  try {
+    await sendEmail({ to: comment.author_email, subject, html: body });
+  } catch (err) {
+    redirect(`/admin/comments?error=${encodeURIComponent((err as Error).message)}`);
+  }
   await sql`update post_comments set replied_at = now() where id = ${id}`;
   revalidatePath("/admin/comments");
 }
