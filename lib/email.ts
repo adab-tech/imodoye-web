@@ -47,15 +47,17 @@ export async function sendEmail({
   html,
   from,
   context,
+  attachments,
 }: {
   to: string;
   subject: string;
   html: string;
   from?: string;
   context?: string;
+  attachments?: { filename: string; path: string }[];
 }) {
   const fromAddress = from ?? FROM;
-  const { error } = await client().emails.send({ from: fromAddress, to, subject, html });
+  const { error } = await client().emails.send({ from: fromAddress, to, subject, html, attachments });
   await logSend({
     from: fromAddress,
     to,

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { sql } from "@/lib/db";
 import { requireRole, CONTENT_ROLES } from "@/lib/auth";
 import { sendEmail, fromAddressFor } from "@/lib/email";
+import { attachmentsFromFormData } from "@/lib/upload";
 
 const APPLICATION_STAGES = [
   "new",
@@ -39,6 +40,7 @@ export async function emailApplicant(id: string, formData: FormData) {
   if (!email) throw new Error("This applicant has no email on file.");
 
   const chosenFrom = String(formData.get("from") ?? "").trim() || "hello@imodoye.ng";
+  const attachments = await attachmentsFromFormData(formData, "attachments", "outbound-attachments");
 
   try {
     await sendEmail({
@@ -47,6 +49,7 @@ export async function emailApplicant(id: string, formData: FormData) {
       html: body,
       from: await fromAddressFor(chosenFrom),
       context: "application_reply",
+      attachments,
     });
   } catch (err) {
     redirect(`/admin/applications/${id}?error=${encodeURIComponent((err as Error).message)}`);

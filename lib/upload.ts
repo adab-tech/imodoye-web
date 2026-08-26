@@ -20,3 +20,16 @@ export async function uploadFileIfPresent(
   });
   return blob.url;
 }
+
+// Uploads every non-empty file under `fieldName` (an <input type="file"
+// multiple> field) and returns them in the shape Resend's `attachments`
+// option expects — a `path` URL it fetches from, rather than inline content.
+export async function attachmentsFromFormData(formData: FormData, fieldName: string, pathPrefix: string) {
+  const files = formData.getAll(fieldName).filter((f): f is File => f instanceof File && f.size > 0);
+  const attachments: { filename: string; path: string }[] = [];
+  for (const file of files) {
+    const url = await uploadFileIfPresent(file, pathPrefix);
+    if (url) attachments.push({ filename: file.name, path: url });
+  }
+  return attachments.length > 0 ? attachments : undefined;
+}

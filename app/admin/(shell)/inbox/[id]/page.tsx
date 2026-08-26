@@ -19,6 +19,7 @@ export default async function InboxDetailPage({
   if (!email) return notFound();
 
   const mailboxes = await sql`select address, display_name from mailboxes order by address`;
+  const attachments = await sql`select * from inbound_email_attachments where inbound_email_id = ${params.id} order by created_at`;
   const boundReply = replyToEmail.bind(null, params.id);
 
   return (
@@ -38,6 +39,22 @@ export default async function InboxDetailPage({
         <p className="font-ui text-sm opacity-80 whitespace-pre-wrap">
           {email.text_body || "(no plain-text body was included with this message)"}
         </p>
+        {attachments.length > 0 && (
+          <div className="mt-4 pt-4 border-t border-ink/10 space-y-1">
+            <p className="font-mono text-xs opacity-50">ATTACHMENTS</p>
+            {attachments.map((a) => (
+              <a
+                key={a.id}
+                href={a.url}
+                target="_blank"
+                rel="noreferrer"
+                className="block font-mono text-xs text-indigo underline"
+              >
+                {a.filename || "attachment"}
+              </a>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="bg-paper rounded p-6">
@@ -72,6 +89,15 @@ export default async function InboxDetailPage({
           <div>
             <label className="block font-ui text-sm mb-1 opacity-70">Message</label>
             <RichTextEditor name="body" />
+          </div>
+          <div>
+            <label className="block font-ui text-sm mb-1 opacity-70">Attachments (optional)</label>
+            <input
+              name="attachments"
+              type="file"
+              multiple
+              className="w-full px-3 py-2 border border-ink/15 rounded-sm font-ui text-sm"
+            />
           </div>
           <button type="submit" className="font-ui text-sm px-4 py-2 bg-indigo text-paper rounded-sm">
             Send reply

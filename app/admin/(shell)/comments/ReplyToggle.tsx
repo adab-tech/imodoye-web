@@ -34,6 +34,7 @@ export default function ReplyToggle({
         className="w-full px-3 py-2 border border-ink/15 rounded-sm font-ui text-sm"
       />
       <RichTextEditor name="body" />
+      <input name="attachments" type="file" multiple className="w-full px-3 py-2 border border-ink/15 rounded-sm font-ui text-sm" />
       <button type="submit" className="font-ui text-sm px-4 py-2 bg-indigo text-paper rounded-sm">
         Send reply
       </button>

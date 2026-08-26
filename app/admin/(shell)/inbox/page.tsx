@@ -6,7 +6,13 @@ export const metadata = { title: "Inbox — Imodoye Admin" };
 export const dynamic = "force-dynamic";
 
 export default async function AdminInboxPage() {
-  const emails = await sql`select * from inbound_emails order by received_at desc`;
+  const emails = await sql`
+    select e.*, count(a.id)::int as attachment_count
+    from inbound_emails e
+    left join inbound_email_attachments a on a.inbound_email_id = e.id
+    group by e.id
+    order by e.received_at desc
+  `;
 
   return (
     <div>
@@ -18,7 +24,14 @@ export default async function AdminInboxPage() {
           <div key={e.id} className="bg-paper rounded p-5">
             <div className="flex items-center justify-between mb-2">
               <div>
-                <p className="font-ui text-base">{e.subject || "(no subject)"}</p>
+                <p className="font-ui text-base">
+                  {e.subject || "(no subject)"}
+                  {e.attachment_count > 0 && (
+                    <span className="font-mono text-xs opacity-50 ml-2">
+                      ({e.attachment_count} attachment{e.attachment_count === 1 ? "" : "s"})
+                    </span>
+                  )}
+                </p>
                 <p className="font-mono text-xs opacity-50">
                   {e.from_address} → {e.to_address} ·{" "}
                   {new Date(e.received_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { sql } from "@/lib/db";
 import { requireRole, CONTENT_ROLES } from "@/lib/auth";
 import { sendEmail, fromAddressFor } from "@/lib/email";
+import { attachmentsFromFormData } from "@/lib/upload";
 
 export async function markInquiryStatus(id: string, status: "new" | "read" | "replied") {
   await requireRole(CONTENT_ROLES);
@@ -23,6 +24,7 @@ export async function replyToInquiry(id: string, formData: FormData) {
   if (!inquiry) throw new Error("That inquiry no longer exists.");
 
   const chosenFrom = String(formData.get("from") ?? "").trim() || "hello@imodoye.ng";
+  const attachments = await attachmentsFromFormData(formData, "attachments", "outbound-attachments");
 
   try {
     await sendEmail({
@@ -31,6 +33,7 @@ export async function replyToInquiry(id: string, formData: FormData) {
       html: body,
       from: await fromAddressFor(chosenFrom),
       context: "inquiry_reply",
+      attachments,
     });
   } catch (err) {
     redirect(`/admin/inquiries/${id}?error=${encodeURIComponent((err as Error).message)}`);

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { sql } from "@/lib/db";
 import { requireRole, CONTENT_ROLES } from "@/lib/auth";
 import { sendEmail, fromAddressFor } from "@/lib/email";
+import { attachmentsFromFormData } from "@/lib/upload";
 
 export async function markEmailStatus(id: string, status: "new" | "read" | "replied") {
   await requireRole(CONTENT_ROLES);
@@ -26,6 +27,7 @@ export async function replyToEmail(id: string, formData: FormData) {
   // can still override via the From picker (e.g. reply as hello@ to
   // something sent to editorial@).
   const chosenFrom = String(formData.get("from") ?? "").trim() || email.to_address;
+  const attachments = await attachmentsFromFormData(formData, "attachments", "outbound-attachments");
 
   try {
     await sendEmail({
@@ -34,6 +36,7 @@ export async function replyToEmail(id: string, formData: FormData) {
       html: body,
       from: await fromAddressFor(chosenFrom),
       context: "inbox_reply",
+      attachments,
     });
   } catch (err) {
     redirect(`/admin/inbox/${id}?error=${encodeURIComponent((err as Error).message)}`);

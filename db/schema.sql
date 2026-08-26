@@ -299,7 +299,9 @@ create table sent_emails (
 -- Mail sent to any @imodoye.ng address, received via Resend's inbound
 -- webhook (email.received) — see app/api/webhooks/resend/route.ts. Resend
 -- has no mailbox/webmail of its own, so this table plus the admin Inbox
--- page is the only way to read mail sent to the domain.
+-- page is the only way to read mail sent to the domain. The webhook event
+-- itself carries no body/attachment content, only metadata — the route
+-- makes a follow-up API call (emails.receiving.get) to fetch text/html.
 create table inbound_emails (
   id uuid primary key default gen_random_uuid(),
   from_address text not null,
@@ -309,6 +311,18 @@ create table inbound_emails (
   html_body text,
   status text not null default 'new', -- new | read | replied
   received_at timestamptz not null default now()
+);
+
+-- Files attached to a received email, downloaded from Resend's (1-hour
+-- signed) attachment URL at receive time and re-hosted on Vercel Blob so
+-- they're durably linkable from the admin Inbox.
+create table inbound_email_attachments (
+  id uuid primary key default gen_random_uuid(),
+  inbound_email_id uuid not null references inbound_emails(id) on delete cascade,
+  filename text,
+  content_type text,
+  url text not null,
+  created_at timestamptz not null default now()
 );
 
 -- Post comments: name/email only, no account required. Held for admin

@@ -96,6 +96,15 @@ export default async function ApplicationDetailPage({
             <label className="block font-ui text-sm mb-1 opacity-70">Message</label>
             <RichTextEditor name="body" />
           </div>
+          <div>
+            <label className="block font-ui text-sm mb-1 opacity-70">Attachments (optional)</label>
+            <input
+              name="attachments"
+              type="file"
+              multiple
+              className="w-full px-3 py-2 border border-ink/15 rounded-sm font-ui text-sm"
+            />
+          </div>
           <button type="submit" className="font-ui text-sm px-4 py-2 bg-indigo text-paper rounded-sm">
             Send email
           </button>

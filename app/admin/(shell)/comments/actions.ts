@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { sql } from "@/lib/db";
 import { requireRole, CONTENT_ROLES } from "@/lib/auth";
 import { sendEmail, fromAddressFor } from "@/lib/email";
+import { attachmentsFromFormData } from "@/lib/upload";
 
 export async function replyToComment(id: string, formData: FormData) {
   await requireRole(CONTENT_ROLES);
@@ -17,6 +18,7 @@ export async function replyToComment(id: string, formData: FormData) {
   if (!comment) throw new Error("That comment no longer exists.");
 
   const chosenFrom = String(formData.get("from") ?? "").trim() || "hello@imodoye.ng";
+  const attachments = await attachmentsFromFormData(formData, "attachments", "outbound-attachments");
 
   try {
     await sendEmail({
@@ -25,6 +27,7 @@ export async function replyToComment(id: string, formData: FormData) {
       html: body,
       from: await fromAddressFor(chosenFrom),
       context: "comment_reply",
+      attachments,
     });
   } catch (err) {
     redirect(`/admin/comments?error=${encodeURIComponent((err as Error).message)}`);
