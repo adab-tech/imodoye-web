@@ -264,6 +264,33 @@ create table inquiries (
   created_at timestamptz not null default now()
 );
 
+-- Personas an admin can send @imodoye.ng mail as (editorial@, hello@, ...),
+-- purely for the admin UI's "From" pickers and the Mailboxes management
+-- page. Resend's inbound webhook accepts mail to ANY address at the domain
+-- regardless of what's listed here — a row in this table does not turn
+-- receiving on, and removing one does not turn it off.
+create table mailboxes (
+  id uuid primary key default gen_random_uuid(),
+  address text not null unique,
+  display_name text not null,
+  created_at timestamptz not null default now()
+);
+
+-- Audit trail of every outbound email the app has sent, whichever admin
+-- action triggered it (reply, broadcast, applicant email, ...) — the
+-- "track email sent" record keeping lib/email.ts's sendEmail/sendBroadcast
+-- append to on every call.
+create table sent_emails (
+  id uuid primary key default gen_random_uuid(),
+  from_address text not null,
+  to_address text not null,
+  subject text not null,
+  context text,
+  status text not null, -- sent | failed
+  error text,
+  sent_at timestamptz not null default now()
+);
+
 -- Mail sent to any @imodoye.ng address, received via Resend's inbound
 -- webhook (email.received) — see app/api/webhooks/resend/route.ts. Resend
 -- has no mailbox/webmail of its own, so this table plus the admin Inbox

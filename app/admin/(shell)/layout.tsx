@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { href: "/admin/applications", label: "Applications" },
   { href: "/admin/inquiries", label: "Inquiries" },
   { href: "/admin/inbox", label: "Inbox" },
+  { href: "/admin/sent", label: "Sent Mail" },
   { href: "/admin/subscribers", label: "Subscribers" },
   { href: "/admin/posts", label: "Posts" },
   { href: "/admin/comments", label: "Comments" },
@@ -20,6 +21,7 @@ const NAV_ITEMS = [
 
 const OWNER_NAV_ITEMS = [
   { href: "/admin/team", label: "Team" },
+  { href: "/admin/mailboxes", label: "Mailboxes" },
   { href: "/admin/settings", label: "Settings" },
 ];
 

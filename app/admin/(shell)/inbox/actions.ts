@@ -22,8 +22,19 @@ export async function replyToEmail(id: string, formData: FormData) {
   const email = rows[0];
   if (!email) throw new Error("That message no longer exists.");
 
+  // Defaults to whichever address this message was received at; an admin
+  // can still override via the From picker (e.g. reply as hello@ to
+  // something sent to editorial@).
+  const chosenFrom = String(formData.get("from") ?? "").trim() || email.to_address;
+
   try {
-    await sendEmail({ to: email.from_address, subject, html: body, from: fromAddressFor(email.to_address) });
+    await sendEmail({
+      to: email.from_address,
+      subject,
+      html: body,
+      from: await fromAddressFor(chosenFrom),
+      context: "inbox_reply",
+    });
   } catch (err) {
     redirect(`/admin/inbox/${id}?error=${encodeURIComponent((err as Error).message)}`);
   }

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { sql } from "@/lib/db";
 import { requireRole, CONTENT_ROLES } from "@/lib/auth";
-import { sendEmail } from "@/lib/email";
+import { sendEmail, fromAddressFor } from "@/lib/email";
 
 export async function markInquiryStatus(id: string, status: "new" | "read" | "replied") {
   await requireRole(CONTENT_ROLES);
@@ -22,8 +22,16 @@ export async function replyToInquiry(id: string, formData: FormData) {
   const inquiry = rows[0];
   if (!inquiry) throw new Error("That inquiry no longer exists.");
 
+  const chosenFrom = String(formData.get("from") ?? "").trim() || "hello@imodoye.ng";
+
   try {
-    await sendEmail({ to: inquiry.email, subject, html: body });
+    await sendEmail({
+      to: inquiry.email,
+      subject,
+      html: body,
+      from: await fromAddressFor(chosenFrom),
+      context: "inquiry_reply",
+    });
   } catch (err) {
     redirect(`/admin/inquiries/${id}?error=${encodeURIComponent((err as Error).message)}`);
   }

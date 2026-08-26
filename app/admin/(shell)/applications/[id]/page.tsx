@@ -25,6 +25,7 @@ export default async function ApplicationDetailPage({
   const app = rows[0];
   if (!app) return notFound();
 
+  const mailboxes = await sql`select address, display_name from mailboxes order by address`;
   const boundEmail = emailApplicant.bind(null, params.id);
 
   return (
@@ -70,6 +71,18 @@ export default async function ApplicationDetailPage({
           <p className="font-ui text-sm text-terracotta mb-4">{searchParams.error}</p>
         )}
         <form action={boundEmail} className="space-y-4">
+          <div>
+            <label className="block font-ui text-sm mb-1 opacity-70">From</label>
+            <select
+              name="from"
+              defaultValue="hello@imodoye.ng"
+              className="w-full px-3 py-2 border border-ink/15 rounded-sm font-ui text-sm bg-transparent"
+            >
+              {mailboxes.map((m) => (
+                <option key={m.address} value={m.address}>{m.display_name} &lt;{m.address}&gt;</option>
+              ))}
+            </select>
+          </div>
           <div>
             <label className="block font-ui text-sm mb-1 opacity-70">Subject</label>
             <input

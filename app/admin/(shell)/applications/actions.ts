@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { sql } from "@/lib/db";
 import { requireRole, CONTENT_ROLES } from "@/lib/auth";
-import { sendEmail } from "@/lib/email";
+import { sendEmail, fromAddressFor } from "@/lib/email";
 
 const APPLICATION_STAGES = [
   "new",
@@ -38,8 +38,16 @@ export async function emailApplicant(id: string, formData: FormData) {
   const email = rows[0]?.email;
   if (!email) throw new Error("This applicant has no email on file.");
 
+  const chosenFrom = String(formData.get("from") ?? "").trim() || "hello@imodoye.ng";
+
   try {
-    await sendEmail({ to: email, subject, html: body });
+    await sendEmail({
+      to: email,
+      subject,
+      html: body,
+      from: await fromAddressFor(chosenFrom),
+      context: "application_reply",
+    });
   } catch (err) {
     redirect(`/admin/applications/${id}?error=${encodeURIComponent((err as Error).message)}`);
   }

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { sql } from "@/lib/db";
 import { requireRole, CONTENT_ROLES } from "@/lib/auth";
-import { sendEmail } from "@/lib/email";
+import { sendEmail, fromAddressFor } from "@/lib/email";
 
 export async function replyToComment(id: string, formData: FormData) {
   await requireRole(CONTENT_ROLES);
@@ -16,8 +16,16 @@ export async function replyToComment(id: string, formData: FormData) {
   const comment = rows[0];
   if (!comment) throw new Error("That comment no longer exists.");
 
+  const chosenFrom = String(formData.get("from") ?? "").trim() || "hello@imodoye.ng";
+
   try {
-    await sendEmail({ to: comment.author_email, subject, html: body });
+    await sendEmail({
+      to: comment.author_email,
+      subject,
+      html: body,
+      from: await fromAddressFor(chosenFrom),
+      context: "comment_reply",
+    });
   } catch (err) {
     redirect(`/admin/comments?error=${encodeURIComponent((err as Error).message)}`);
   }

@@ -18,6 +18,7 @@ export default async function InboxDetailPage({
   const email = rows[0];
   if (!email) return notFound();
 
+  const mailboxes = await sql`select address, display_name from mailboxes order by address`;
   const boundReply = replyToEmail.bind(null, params.id);
 
   return (
@@ -47,6 +48,18 @@ export default async function InboxDetailPage({
           <p className="font-ui text-sm text-terracotta mb-4">{searchParams.error}</p>
         )}
         <form action={boundReply} className="space-y-4">
+          <div>
+            <label className="block font-ui text-sm mb-1 opacity-70">From</label>
+            <select
+              name="from"
+              defaultValue={email.to_address}
+              className="w-full px-3 py-2 border border-ink/15 rounded-sm font-ui text-sm bg-transparent"
+            >
+              {mailboxes.map((m) => (
+                <option key={m.address} value={m.address}>{m.display_name} &lt;{m.address}&gt;</option>
+              ))}
+            </select>
+          </div>
           <div>
             <label className="block font-ui text-sm mb-1 opacity-70">Subject</label>
             <input

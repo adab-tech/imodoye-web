@@ -16,6 +16,7 @@ export default async function AdminCommentsPage({
     left join posts p on p.id = c.post_id
     order by c.approved asc, c.created_at desc
   `;
+  const mailboxes = await sql`select address, display_name from mailboxes order by address`;
 
   return (
     <div>
@@ -49,7 +50,7 @@ export default async function AdminCommentsPage({
               <form action={deleteComment.bind(null, c.id, c.slug)}>
                 <button type="submit" className="font-mono text-xs underline text-terracotta">delete</button>
               </form>
-              <ReplyToggle action={replyToComment.bind(null, c.id)} />
+              <ReplyToggle action={replyToComment.bind(null, c.id)} mailboxes={mailboxes as { address: string; display_name: string }[]} />
             </div>
           </div>
         ))}
