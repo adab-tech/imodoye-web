@@ -13,11 +13,19 @@ const ROLE_LABELS: Record<string, string> = {
   content_editor: "Content Editor",
 };
 
-export default function NewEditorPage() {
+export default function NewEditorPage({
+  searchParams,
+}: {
+  searchParams: { error?: string };
+}) {
   return (
     <div>
       <p className="font-mono text-xs mb-3 text-indigo">TEAM</p>
       <h1 className="font-display text-3xl mb-8">Invite an editor</h1>
+
+      {searchParams.error && (
+        <p className="font-ui text-sm text-terracotta mb-6">{searchParams.error}</p>
+      )}
 
       <form action={inviteEditor} className="max-w-sm space-y-4">
         <div>
@@ -29,8 +37,11 @@ export default function NewEditorPage() {
           <input name="email" type="email" required className="w-full px-3 py-2 border border-ink/15 rounded-sm font-ui text-sm" />
         </div>
         <div>
-          <label className="block font-ui text-sm mb-1 opacity-70">Temporary password (8+ characters)</label>
-          <input name="password" type="password" required minLength={8} className="w-full px-3 py-2 border border-ink/15 rounded-sm font-ui text-sm" />
+          <label className="block font-ui text-sm mb-1 opacity-70">Password (optional)</label>
+          <input name="password" type="password" minLength={8} className="w-full px-3 py-2 border border-ink/15 rounded-sm font-ui text-sm" />
+          <p className="font-ui text-xs opacity-50 mt-1">
+            Leave blank to get a one-time setup link instead, for them to set their own password.
+          </p>
         </div>
         <div>
           <label className="block font-ui text-sm mb-1 opacity-70">Role</label>

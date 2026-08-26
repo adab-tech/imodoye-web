@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { sql } from "@/lib/db";
 import { requireRole, OWNER_ROLES, ADMIN_ROLES, type AdminRole } from "@/lib/auth";
+import { createResetToken } from "@/lib/password-reset";
 
 export async function inviteEditor(formData: FormData) {
   const session = await requireRole(OWNER_ROLES);
@@ -14,27 +15,40 @@ export async function inviteEditor(formData: FormData) {
   const password = String(formData.get("password") ?? "");
   const role = String(formData.get("role") ?? "") as AdminRole;
 
-  if (!fullName || !email || password.length < 8) {
-    throw new Error("Name, email, and an 8+ character password are required.");
+  if (!fullName || !email) {
+    redirect(`/admin/team/new?error=${encodeURIComponent("Name and email are required.")}`);
+  }
+  if (password && password.length < 8) {
+    redirect(`/admin/team/new?error=${encodeURIComponent("Password must be at least 8 characters, or left blank.")}`);
   }
   if (!ADMIN_ROLES.includes(role)) {
-    throw new Error("Choose a valid role.");
+    redirect(`/admin/team/new?error=${encodeURIComponent("Choose a valid role.")}`);
   }
 
-  const passwordHash = await bcrypt.hash(password, 12);
+  // A blank password creates the account with none set — they get a setup
+  // link instead (see below), since a brand-new admin has no way to check
+  // an @imodoye.ng inbox before they can sign in.
+  const passwordHash = password ? await bcrypt.hash(password, 12) : null;
+  let newId: string;
   try {
-    await sql`
+    const rows = await sql`
       insert into profiles (full_name, email, password_hash, role)
       values (${fullName}, ${email}, ${passwordHash}, ${role})
+      returning id
     `;
+    newId = rows[0].id;
   } catch (err) {
     if ((err as { code?: string })?.code === "23505") {
-      throw new Error("An account with that email already exists.");
+      redirect(`/admin/team/new?error=${encodeURIComponent("An account with that email already exists.")}`);
     }
     throw err;
   }
 
   revalidatePath("/admin/team");
+  if (!password) {
+    const token = await createResetToken(newId);
+    redirect(`/admin/team?setupLink=${encodeURIComponent(`https://imodoye.ng/admin/reset-password?token=${token}`)}`);
+  }
   redirect("/admin/team");
 }
 

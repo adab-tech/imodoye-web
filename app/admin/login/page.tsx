@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { sql } from "@/lib/db";
 import { loginAction } from "./actions";
@@ -8,7 +9,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminLoginPage({
   searchParams,
 }: {
-  searchParams: { next?: string; error?: string };
+  searchParams: { next?: string; error?: string; reset?: string };
 }) {
   const [{ count }] = await sql`select count(*)::int as count from profiles where role = 'super_admin'`;
   if (count === 0) redirect("/admin/setup");
@@ -37,6 +38,9 @@ export default async function AdminLoginPage({
           className="w-full mb-2 px-3 py-2 border border-ink/15 rounded-sm font-ui text-sm"
         />
 
+        {searchParams.reset && (
+          <p className="font-ui text-sm text-palm mb-4">Password updated — sign in below.</p>
+        )}
         {searchParams.error === "race" && (
           <p className="font-ui text-sm text-terracotta mb-4">
             Setup was just completed by someone else. Sign in with those credentials.
@@ -52,6 +56,10 @@ export default async function AdminLoginPage({
         >
           Sign in
         </button>
+
+        <Link href="/admin/forgot-password" className="block font-ui text-sm opacity-60 mt-4 text-center">
+          Forgot password?
+        </Link>
       </form>
     </div>
   );

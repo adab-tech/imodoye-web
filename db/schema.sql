@@ -34,6 +34,11 @@ create table profiles (
   state text,
   country text,
   socials jsonb default '{}',
+  -- Set by /admin/forgot-password (or an owner inviting someone with no
+  -- password yet); consumed by /admin/reset-password. Holds a hash of the
+  -- token, never the token itself — see lib/password-reset.ts.
+  reset_token_hash text,
+  reset_token_expires timestamptz,
   created_at timestamptz not null default now()
 );
 

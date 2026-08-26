@@ -19,7 +19,7 @@ const ROLE_LABELS: Record<string, string> = {
 export default async function AdminTeamPage({
   searchParams,
 }: {
-  searchParams: { error?: string };
+  searchParams: { error?: string; setupLink?: string };
 }) {
   const session = await auth();
   const team = await sql`select id, full_name, email, role, created_at from profiles where role != 'public' order by created_at`;
@@ -38,6 +38,16 @@ export default async function AdminTeamPage({
 
       {searchParams.error && (
         <p className="font-ui text-sm text-terracotta mb-6">{searchParams.error}</p>
+      )}
+      {searchParams.setupLink && (
+        <div className="bg-paper rounded p-4 mb-6">
+          <p className="font-ui text-sm mb-2">
+            Account created with no password. Share this one-time setup link with
+            them directly (it won't show again) — email won't reach them since
+            they can't sign in yet to check an @imodoye.ng inbox:
+          </p>
+          <p className="font-mono text-xs break-all bg-manuscript rounded p-2">{searchParams.setupLink}</p>
+        </div>
       )}
 
       <div className="bg-paper rounded divide-y divide-ink/10">
