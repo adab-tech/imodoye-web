@@ -11,8 +11,32 @@ function client() {
 
 const FROM = process.env.EMAIL_FROM || "Imodoye <hello@imodoye.ng>";
 
-export async function sendEmail({ to, subject, html }: { to: string; subject: string; html: string }) {
-  const { error } = await client().emails.send({ from: FROM, to, subject, html });
+// Display name per @imodoye.ng address, so a reply's "From" matches the
+// persona a sender actually wrote to (editorial@/submissions@ vs the
+// general hello@) instead of always showing as the same address.
+const FROM_DISPLAY_NAMES: Record<string, string> = {
+  "editorial@imodoye.ng": "Imodoye Editorial",
+  "submissions@imodoye.ng": "Imodoye Editorial",
+  "hello@imodoye.ng": "Imodoye",
+};
+
+export function fromAddressFor(address: string) {
+  const name = FROM_DISPLAY_NAMES[address.toLowerCase()] ?? "Imodoye";
+  return `${name} <${address}>`;
+}
+
+export async function sendEmail({
+  to,
+  subject,
+  html,
+  from,
+}: {
+  to: string;
+  subject: string;
+  html: string;
+  from?: string;
+}) {
+  const { error } = await client().emails.send({ from: from ?? FROM, to, subject, html });
   if (error) throw new Error(error.message ?? "Failed to send email.");
 }
 
