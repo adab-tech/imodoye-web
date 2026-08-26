@@ -41,22 +41,46 @@ export async function inviteEditor(formData: FormData) {
 export async function updateEditorRole(id: string, formData: FormData) {
   await requireRole(OWNER_ROLES);
   const role = String(formData.get("role") ?? "") as AdminRole;
-  if (!ADMIN_ROLES.includes(role)) throw new Error("Choose a valid role.");
+  if (!ADMIN_ROLES.includes(role)) {
+    redirect(`/admin/team?error=${encodeURIComponent("Choose a valid role.")}`);
+  }
 
   await sql`update profiles set role = ${role} where id = ${id}`;
+  revalidatePath("/admin/team");
+}
+
+export async function updateEditorEmail(id: string, formData: FormData) {
+  await requireRole(OWNER_ROLES);
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  if (!email || !email.includes("@")) {
+    redirect(`/admin/team?error=${encodeURIComponent("Enter a valid email address.")}`);
+  }
+
+  try {
+    await sql`update profiles set email = ${email} where id = ${id}`;
+  } catch (err) {
+    if ((err as { code?: string })?.code === "23505") {
+      redirect(`/admin/team?error=${encodeURIComponent("An account with that email already exists.")}`);
+    }
+    throw err;
+  }
+
+  // The Credentials provider matches sessions by email, so this account's
+  // existing session is now stale — it must sign in again with the new
+  // address (same password, nothing else changes).
   revalidatePath("/admin/team");
 }
 
 export async function removeEditor(id: string) {
   const session = await requireRole(OWNER_ROLES);
   if (session.user.id === id) {
-    throw new Error("You can't remove your own account.");
+    redirect(`/admin/team?error=${encodeURIComponent("You can't remove your own account.")}`);
   }
 
   const [{ count }] = await sql`select count(*)::int as count from profiles where role = 'super_admin'`;
   const [target] = await sql`select role from profiles where id = ${id}`;
   if (target?.role === "super_admin" && count <= 1) {
-    throw new Error("Can't remove the last super_admin account.");
+    redirect(`/admin/team?error=${encodeURIComponent("Can't remove the last super_admin account.")}`);
   }
 
   await sql`delete from profiles where id = ${id}`;

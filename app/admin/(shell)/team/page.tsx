@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { sql } from "@/lib/db";
 import { auth, ADMIN_ROLES } from "@/lib/auth";
-import { updateEditorRole, removeEditor } from "./actions";
+import { updateEditorRole, updateEditorEmail, removeEditor } from "./actions";
 
 export const metadata = { title: "Team — Imodoye Admin" };
 export const dynamic = "force-dynamic";
@@ -16,7 +16,11 @@ const ROLE_LABELS: Record<string, string> = {
   content_editor: "Content Editor",
 };
 
-export default async function AdminTeamPage() {
+export default async function AdminTeamPage({
+  searchParams,
+}: {
+  searchParams: { error?: string };
+}) {
   const session = await auth();
   const team = await sql`select id, full_name, email, role, created_at from profiles where role != 'public' order by created_at`;
 
@@ -32,12 +36,24 @@ export default async function AdminTeamPage() {
         </Link>
       </div>
 
+      {searchParams.error && (
+        <p className="font-ui text-sm text-terracotta mb-6">{searchParams.error}</p>
+      )}
+
       <div className="bg-paper rounded divide-y divide-ink/10">
         {team.map((member) => (
           <div key={member.id} className="flex items-center justify-between px-5 py-4">
             <div>
               <p className="font-ui text-base">{member.full_name}</p>
-              <p className="font-mono text-xs opacity-50">{member.email}</p>
+              <form action={updateEditorEmail.bind(null, member.id)} className="flex items-center gap-2 mt-1">
+                <input
+                  name="email"
+                  type="email"
+                  defaultValue={member.email}
+                  className="font-mono text-xs px-2 py-1 border border-ink/15 rounded-sm bg-transparent opacity-50 focus:opacity-100"
+                />
+                <button type="submit" className="font-mono text-xs opacity-50 underline">save</button>
+              </form>
             </div>
             <div className="flex items-center gap-4">
               <form action={updateEditorRole.bind(null, member.id)} className="flex items-center gap-2">
