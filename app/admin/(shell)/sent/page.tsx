@@ -9,9 +9,14 @@ const CONTEXT_LABELS: Record<string, string> = {
   application_reply: "Application email",
   comment_reply: "Comment reply",
   newsletter_broadcast: "Newsletter broadcast",
+  manual_compose: "Composed",
 };
 
-export default async function SentMailPage() {
+export default async function SentMailPage({
+  searchParams,
+}: {
+  searchParams: { sent?: string };
+}) {
   const sent = await sql`select * from sent_emails order by sent_at desc limit 200`;
 
   return (
@@ -19,6 +24,9 @@ export default async function SentMailPage() {
       <p className="font-mono text-xs mb-3 text-indigo">MAIL</p>
       <h1 className="font-display text-3xl mb-2">Sent mail</h1>
       <p className="font-ui text-sm opacity-60 mb-8">Most recent 200 sends, across every admin action.</p>
+      {searchParams.sent && (
+        <p className="font-ui text-sm text-palm mb-6">Sent.</p>
+      )}
 
       <div className="space-y-2 max-w-3xl">
         {sent.map((s) => (
