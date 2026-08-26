@@ -264,6 +264,21 @@ create table inquiries (
   created_at timestamptz not null default now()
 );
 
+-- Mail sent to any @imodoye.ng address, received via Resend's inbound
+-- webhook (email.received) — see app/api/webhooks/resend/route.ts. Resend
+-- has no mailbox/webmail of its own, so this table plus the admin Inbox
+-- page is the only way to read mail sent to the domain.
+create table inbound_emails (
+  id uuid primary key default gen_random_uuid(),
+  from_address text not null,
+  to_address text not null,
+  subject text,
+  text_body text,
+  html_body text,
+  status text not null default 'new', -- new | read | replied
+  received_at timestamptz not null default now()
+);
+
 -- Post comments: name/email only, no account required. Held for admin
 -- approval before appearing publicly (spam control on an open form).
 create table post_comments (
