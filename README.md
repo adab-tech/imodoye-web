@@ -65,3 +65,7 @@ Connected to GitHub (`adab-tech/imodoye-web`, `main` branch) — pushing to `mai
 3. Add a brand asset library (logo/media management) and an Inquiries inbox (new contact form + admin view) to the admin
 4. Port the remaining preview pages (application form submission) from static mock data to a real, data-connected flow
 5. Re-enable the RLS-equivalent access rules in `db/schema.sql` once there's a concrete need beyond the app-layer role checks already enforced in `lib/auth.ts` / `middleware.ts`
+
+## License
+
+All rights reserved — see [LICENSE](LICENSE).
