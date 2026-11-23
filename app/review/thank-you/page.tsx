@@ -2,11 +2,13 @@ import Link from "next/link";
 
 export const metadata = { title: "Submission received — Imodoye Review" };
 
-export default function ThankYouPage({
-  searchParams,
+export default async function ThankYouPage({
+  searchParams: queryParams,
 }: {
-  searchParams: { ref?: string };
+  searchParams: Promise<{ ref?: string }>;
 }) {
+  const searchParams = await queryParams;
+
   return (
     <section className="px-6 py-24 md:px-16 bg-ink text-manuscript min-h-[60vh] flex items-center">
       <div className="max-w-md">

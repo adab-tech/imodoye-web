@@ -14,14 +14,20 @@ export async function generateStaticParams() {
 }
 
 export default async function PublicationPage({
-  params,
+  params: routeParams,
 }: {
-  params: { issueId: string; slug: string };
+  params: Promise<{ issueId: string; slug: string }>;
 }) {
+  const params = await routeParams;
+  const issueNumber = Number(params.issueId);
+  if (!Number.isInteger(issueNumber) || issueNumber < -2147483648 || issueNumber > 2147483647) {
+    return notFound();
+  }
+
   const rows = await sql`
     select p.title, p.body, p.category, p.published_at, i.number as issue_number, i.theme
     from publications p join issues i on i.id = p.issue_id
-    where p.slug = ${params.slug} and i.number = ${Number(params.issueId)} and p.published_at is not null
+    where p.slug = ${params.slug} and i.number = ${issueNumber} and p.published_at is not null
   `;
   const piece = rows[0];
   if (!piece) return notFound();

@@ -13,10 +13,12 @@ const CONTEXT_LABELS: Record<string, string> = {
 };
 
 export default async function SentMailPage({
-  searchParams,
+  searchParams: queryParams,
 }: {
-  searchParams: { sent?: string };
+  searchParams: Promise<{ sent?: string }>;
 }) {
+  const searchParams = await queryParams;
+
   const sent = await sql`select * from sent_emails order by sent_at desc limit 200`;
 
   return (

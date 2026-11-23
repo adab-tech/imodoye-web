@@ -6,10 +6,12 @@ export const metadata = { title: "Set up admin — Imodoye" };
 export const dynamic = "force-dynamic";
 
 export default async function AdminSetupPage({
-  searchParams,
+  searchParams: queryParams,
 }: {
-  searchParams: { error?: string };
+  searchParams: Promise<{ error?: string }>;
 }) {
+  const searchParams = await queryParams;
+
   const [{ count }] = await sql`select count(*)::int as count from profiles where role = 'super_admin'`;
   if (count > 0) redirect("/admin/login");
 

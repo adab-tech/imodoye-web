@@ -6,7 +6,9 @@ import { updatePartner, deletePartner } from "../actions";
 export const metadata = { title: "Edit partner — Imodoye Admin" };
 export const dynamic = "force-dynamic";
 
-export default async function EditPartnerPage({ params }: { params: { id: string } }) {
+export default async function EditPartnerPage({ params: routeParams }: { params: Promise<{ id: string }> }) {
+  const params = await routeParams;
+
   const rows = await sql`select * from partners where id = ${params.id}`;
   const partner = rows[0];
   if (!partner) return notFound();

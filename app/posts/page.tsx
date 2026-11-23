@@ -10,10 +10,12 @@ function stripHtml(html: string) {
 }
 
 export default async function PostsPage({
-  searchParams,
+  searchParams: queryParams,
 }: {
-  searchParams: { category?: string; tag?: string };
+  searchParams: Promise<{ category?: string; tag?: string }>;
 }) {
+  const searchParams = await queryParams;
+
   const activeCategory = searchParams.category;
   const activeTag = searchParams.tag;
 

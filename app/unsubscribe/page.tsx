@@ -5,10 +5,12 @@ export const metadata = { title: "Unsubscribe — Imodoye" };
 export const dynamic = "force-dynamic";
 
 export default async function UnsubscribePage({
-  searchParams,
+  searchParams: queryParams,
 }: {
-  searchParams: { token?: string };
+  searchParams: Promise<{ token?: string }>;
 }) {
+  const searchParams = await queryParams;
+
   const token = searchParams.token;
   const rows = token ? await sql`select email from subscribers where unsubscribe_token = ${token}` : [];
   const subscriber = rows[0];

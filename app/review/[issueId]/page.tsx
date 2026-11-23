@@ -11,11 +11,17 @@ export async function generateStaticParams() {
 }
 
 export default async function IssuePage({
-  params,
+  params: routeParams,
 }: {
-  params: { issueId: string };
+  params: Promise<{ issueId: string }>;
 }) {
-  const rows = await sql`select * from issues where number = ${Number(params.issueId)}`;
+  const params = await routeParams;
+  const issueNumber = Number(params.issueId);
+  if (!Number.isInteger(issueNumber) || issueNumber < -2147483648 || issueNumber > 2147483647) {
+    return notFound();
+  }
+
+  const rows = await sql`select * from issues where number = ${issueNumber}`;
   const issue = rows[0];
   if (!issue) return notFound();
 

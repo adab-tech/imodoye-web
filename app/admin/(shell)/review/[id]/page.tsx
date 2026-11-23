@@ -8,7 +8,9 @@ import { COMPOSABLE_STAGES } from "@/lib/categories";
 export const metadata = { title: "Blind review — Imodoye Admin" };
 export const dynamic = "force-dynamic";
 
-export default async function BlindReviewPage({ params }: { params: { id: string } }) {
+export default async function BlindReviewPage({ params: routeParams }: { params: Promise<{ id: string }> }) {
+  const params = await routeParams;
+
   // Explicit column list — deliberately excludes author_id. Blind review
   // depends on this query never having the author's identity to leak,
   // not just on the JSX choosing not to render it (see db/schema.sql).

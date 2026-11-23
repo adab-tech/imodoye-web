@@ -5,7 +5,9 @@ import { updateCohort, addCohortPhoto, removeCohortPhoto } from "../actions";
 export const metadata = { title: "Edit cohort — Imodoye Admin" };
 export const dynamic = "force-dynamic";
 
-export default async function EditCohortPage({ params }: { params: { id: string } }) {
+export default async function EditCohortPage({ params: routeParams }: { params: Promise<{ id: string }> }) {
+  const params = await routeParams;
+
   const [rows, fellows, photos] = await Promise.all([
     sql`select * from cohorts where id = ${params.id}`,
     sql`select id, name from fellows where cohort_id = ${params.id} order by name`,

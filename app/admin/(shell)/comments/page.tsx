@@ -6,10 +6,12 @@ export const metadata = { title: "Comments — Imodoye Admin" };
 export const dynamic = "force-dynamic";
 
 export default async function AdminCommentsPage({
-  searchParams,
+  searchParams: queryParams,
 }: {
-  searchParams: { error?: string };
+  searchParams: Promise<{ error?: string }>;
 }) {
+  const searchParams = await queryParams;
+
   const comments = await sql`
     select c.id, c.author_name, c.author_email, c.body, c.approved, c.replied_at, c.created_at, p.title, p.slug
     from post_comments c

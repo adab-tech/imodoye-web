@@ -9,10 +9,12 @@ export async function generateStaticParams() {
 }
 
 export default async function FellowProfilePage({
-  params,
+  params: routeParams,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
+  const params = await routeParams;
+
   const rows = await sql`
     select f.*, c.number as cohort_number
     from fellows f

@@ -2,11 +2,13 @@ import { signUp } from "./actions";
 
 export const metadata = { title: "Create an account — Imodoye" };
 
-export default function SignUpPage({
-  searchParams,
+export default async function SignUpPage({
+  searchParams: queryParams,
 }: {
-  searchParams: { error?: string };
+  searchParams: Promise<{ error?: string }>;
 }) {
+  const searchParams = await queryParams;
+
   return (
     <div className="min-h-[70vh] flex items-center justify-center px-6 py-16">
       <form action={signUp} className="w-full max-w-sm bg-paper rounded p-8">

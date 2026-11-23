@@ -6,7 +6,9 @@ import { updatePost, deletePost, addPostMedia, removePostMedia } from "../action
 export const metadata = { title: "Edit post — Imodoye Admin" };
 export const dynamic = "force-dynamic";
 
-export default async function EditPostPage({ params }: { params: { id: string } }) {
+export default async function EditPostPage({ params: routeParams }: { params: Promise<{ id: string }> }) {
+  const params = await routeParams;
+
   const [rows, media] = await Promise.all([
     sql`select * from posts where id = ${params.id}`,
     sql`select id, storage_path, file_type, caption from post_media where post_id = ${params.id} order by sort_order, created_at`,

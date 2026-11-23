@@ -6,10 +6,12 @@ export const metadata = { title: "Compose — Imodoye Admin" };
 export const dynamic = "force-dynamic";
 
 export default async function ComposePage({
-  searchParams,
+  searchParams: queryParams,
 }: {
-  searchParams: { error?: string };
+  searchParams: Promise<{ error?: string }>;
 }) {
+  const searchParams = await queryParams;
+
   const mailboxes = await sql`select address, display_name from mailboxes order by address`;
 
   return (
