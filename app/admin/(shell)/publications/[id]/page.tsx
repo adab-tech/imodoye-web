@@ -6,7 +6,9 @@ import { updatePublicationEntry, deletePublicationEntry } from "../actions";
 export const metadata = { title: "Edit publication — Imodoye Admin" };
 export const dynamic = "force-dynamic";
 
-export default async function EditPublicationPage({ params }: { params: { id: string } }) {
+export default async function EditPublicationPage({ params: routeParams }: { params: Promise<{ id: string }> }) {
+  const params = await routeParams;
+
   const rows = await sql`select * from publication_entries where id = ${params.id}`;
   const entry = rows[0];
   if (!entry) return notFound();

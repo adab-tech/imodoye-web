@@ -17,10 +17,12 @@ const ROLE_LABELS: Record<string, string> = {
 };
 
 export default async function AdminTeamPage({
-  searchParams,
+  searchParams: queryParams,
 }: {
-  searchParams: { error?: string; setupLink?: string };
+  searchParams: Promise<{ error?: string; setupLink?: string }>;
 }) {
+  const searchParams = await queryParams;
+
   const session = await auth();
   const team = await sql`select id, full_name, email, role, created_at from profiles where role != 'public' order by created_at`;
 

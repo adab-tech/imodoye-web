@@ -6,10 +6,12 @@ export const metadata = { title: "Set a new password — Imodoye Admin" };
 export const dynamic = "force-dynamic";
 
 export default async function ResetPasswordPage({
-  searchParams,
+  searchParams: queryParams,
 }: {
-  searchParams: { token?: string; error?: string };
+  searchParams: Promise<{ token?: string; error?: string }>;
 }) {
+  const searchParams = await queryParams;
+
   const token = searchParams.token ?? "";
   const profile = token ? await profileForResetToken(token) : null;
 

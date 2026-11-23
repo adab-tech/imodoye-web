@@ -3,11 +3,13 @@ import { requestPasswordReset } from "./actions";
 
 export const metadata = { title: "Forgot password — Imodoye Admin" };
 
-export default function ForgotPasswordPage({
-  searchParams,
+export default async function ForgotPasswordPage({
+  searchParams: queryParams,
 }: {
-  searchParams: { sent?: string };
+  searchParams: Promise<{ sent?: string }>;
 }) {
+  const searchParams = await queryParams;
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-manuscript px-6">
       <form action={requestPasswordReset} className="w-full max-w-sm bg-paper rounded p-8">

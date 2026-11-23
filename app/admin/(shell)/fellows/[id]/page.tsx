@@ -11,7 +11,9 @@ import {
 export const metadata = { title: "Edit fellow — Imodoye Admin" };
 export const dynamic = "force-dynamic";
 
-export default async function EditFellowPage({ params }: { params: { id: string } }) {
+export default async function EditFellowPage({ params: routeParams }: { params: Promise<{ id: string }> }) {
+  const params = await routeParams;
+
   const rows = await sql`
     select f.*, c.number as cohort_number
     from fellows f

@@ -2,11 +2,13 @@ import { loginAction } from "./actions";
 
 export const metadata = { title: "Sign in — Imodoye" };
 
-export default function AccountLoginPage({
-  searchParams,
+export default async function AccountLoginPage({
+  searchParams: queryParams,
 }: {
-  searchParams: { next?: string; error?: string };
+  searchParams: Promise<{ next?: string; error?: string }>;
 }) {
+  const searchParams = await queryParams;
+
   return (
     <div className="min-h-[70vh] flex items-center justify-center px-6 py-16">
       <form action={loginAction} className="w-full max-w-sm bg-paper rounded p-8">

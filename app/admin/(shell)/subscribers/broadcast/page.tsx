@@ -7,10 +7,12 @@ export const metadata = { title: "Write a broadcast — Imodoye Admin" };
 export const dynamic = "force-dynamic";
 
 export default async function BroadcastPage({
-  searchParams,
+  searchParams: queryParams,
 }: {
-  searchParams: { error?: string };
+  searchParams: Promise<{ error?: string }>;
 }) {
+  const searchParams = await queryParams;
+
   const rows = await sql`select count(*) from subscribers`;
   const count = Number(rows[0].count);
 

@@ -9,12 +9,15 @@ export const dynamic = "force-dynamic";
 const STAGES = ["new", "screening", "shortlisted", "interview", "selected", "waitlist", "declined"];
 
 export default async function ApplicationDetailPage({
-  params,
-  searchParams,
+  params: routeParams,
+  searchParams: queryParams,
 }: {
-  params: { id: string };
-  searchParams: { error?: string };
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
+  const params = await routeParams;
+  const searchParams = await queryParams;
+
   const rows = await sql`
     select a.*, p.full_name, p.email, p.country, c.number as cohort_number
     from applications a

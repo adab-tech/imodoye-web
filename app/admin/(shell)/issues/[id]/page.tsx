@@ -6,7 +6,9 @@ import { updateIssue } from "../actions";
 export const metadata = { title: "Edit issue — Imodoye Admin" };
 export const dynamic = "force-dynamic";
 
-export default async function EditIssuePage({ params }: { params: { id: string } }) {
+export default async function EditIssuePage({ params: routeParams }: { params: Promise<{ id: string }> }) {
+  const params = await routeParams;
+
   const rows = await sql`select * from issues where id = ${params.id}`;
   const issue = rows[0];
   if (!issue) return notFound();

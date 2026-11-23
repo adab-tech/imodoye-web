@@ -8,12 +8,15 @@ export const metadata = { title: "Message — Imodoye Admin" };
 export const dynamic = "force-dynamic";
 
 export default async function InboxDetailPage({
-  params,
-  searchParams,
+  params: routeParams,
+  searchParams: queryParams,
 }: {
-  params: { id: string };
-  searchParams: { error?: string };
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
+  const params = await routeParams;
+  const searchParams = await queryParams;
+
   const rows = await sql`select * from inbound_emails where id = ${params.id}`;
   const email = rows[0];
   if (!email) return notFound();

@@ -13,11 +13,13 @@ const ROLE_LABELS: Record<string, string> = {
   content_editor: "Content Editor",
 };
 
-export default function NewEditorPage({
-  searchParams,
+export default async function NewEditorPage({
+  searchParams: queryParams,
 }: {
-  searchParams: { error?: string };
+  searchParams: Promise<{ error?: string }>;
 }) {
+  const searchParams = await queryParams;
+
   return (
     <div>
       <p className="font-mono text-xs mb-3 text-indigo">TEAM</p>

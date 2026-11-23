@@ -6,10 +6,12 @@ export const metadata = { title: "Subscribers — Imodoye Admin" };
 export const dynamic = "force-dynamic";
 
 export default async function SubscribersPage({
-  searchParams,
+  searchParams: queryParams,
 }: {
-  searchParams: { sent?: string };
+  searchParams: Promise<{ sent?: string }>;
 }) {
+  const searchParams = await queryParams;
+
   const subscribers = await sql`select * from subscribers order by created_at desc`;
 
   return (

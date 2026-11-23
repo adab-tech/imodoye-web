@@ -8,12 +8,15 @@ export const metadata = { title: "Inquiry — Imodoye Admin" };
 export const dynamic = "force-dynamic";
 
 export default async function InquiryDetailPage({
-  params,
-  searchParams,
+  params: routeParams,
+  searchParams: queryParams,
 }: {
-  params: { id: string };
-  searchParams: { error?: string };
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
+  const params = await routeParams;
+  const searchParams = await queryParams;
+
   const rows = await sql`select * from inquiries where id = ${params.id}`;
   const inquiry = rows[0];
   if (!inquiry) return notFound();

@@ -11,12 +11,15 @@ export async function generateStaticParams() {
 }
 
 export default async function PostPage({
-  params,
-  searchParams,
+  params: routeParams,
+  searchParams: queryParams,
 }: {
-  params: { slug: string };
-  searchParams: { commented?: string };
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ commented?: string }>;
 }) {
+  const params = await routeParams;
+  const searchParams = await queryParams;
+
   const rows = await sql`
     select id, title, body, category, tags, cover_image_url, published_at from posts
     where slug = ${params.slug} and published_at is not null
